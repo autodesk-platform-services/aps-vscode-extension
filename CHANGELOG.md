@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Changed
   - Repository moved to https://github.com/autodesk-platform-services/aps-vscode-extension (extension ID is unchanged)
+  - Updated Japanese translations (thank you [isezakt](https://github.com/isezakt) and the team!)
 
 ## [3.8.0] - 2026-11-13
 
