@@ -6,14 +6,14 @@
     "description": "%extension.description%",
     "author": "Petr Broz <petr.broz@autodesk.com>",
     "license": "MIT",
-    "version": "3.8.0",
+    "version": "3.8.1",
     "homepage": "https://marketplace.visualstudio.com/items?itemName=petrbroz.vscode-forge-tools",
     "repository": {
         "type": "git",
-        "url": "https://github.com/petrbroz/vscode-forge-tools"
+        "url": "https://github.com/autodesk-platform-services/aps-vscode-extension"
     },
     "bugs": {
-        "url": "https://github.com/petrbroz/vscode-forge-tools/issues",
+        "url": "https://github.com/autodesk-platform-services/aps-vscode-extension/issues",
         "email": "petr.broz@autodesk.com"
     },
     "keywords": [
