@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.8.2] - 2026-11-20
+
+- Added
+  - Hungarian translation
+- Fixed
+  - Loading a design in the viewer failing because the Content Security Policy blocked the WebSocket connection to the Autodesk CDN
+
 ## [3.8.1] - 2026-11-19
 
 - Changed
