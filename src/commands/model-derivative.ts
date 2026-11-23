@@ -129,7 +129,8 @@ export class ModelDerivativesCommands {
 					return;
 				}
 			}
-			const accessToken = await withProgress('Retrieving viewer access token', this.context.modelDerivativeService.getViewerAccessToken(derivative.urn));
+			const environment = this.context.environment;
+			const service = this.context.modelDerivativeService;
 			let env = this.context.previewSettings.env;
 			if (!env) {
 				env = derivative.format === svf2 ? 'AutodeskProduction2' : 'AutodeskProduction';
@@ -137,12 +138,11 @@ export class ModelDerivativesCommands {
 			let api = this.context.previewSettings.api;
 			if (!api) {
 				api = derivative.format === svf2 ? 'streamingV2' : 'derivativeV2';
-				if (this.context.environment.region === 'EMEA') {
+				if (environment.region === 'EMEA') {
 					api += '_EU';
 				}
 				// TODO: what about 'APAC'?
 			}
-			const environment = this.context.environment;
 			const state: IDerivativePreviewState = {
 				version: 1,
 				environment: { title: environment.title, clientId: environment.clientId, host: environment.host, region: environment.region },
@@ -151,6 +151,7 @@ export class ModelDerivativesCommands {
 				api, env,
 				extensions: this.context.previewSettings.extensions
 			};
+			const accessToken = await withProgress('Retrieving viewer access token', service.getViewerAccessToken(derivative.urn));
 			this.showDerivativePreview(`Preview: ${derivative.name}`, state, accessToken);
 		} catch (err) {
 			showErrorMessage(`Could not access object`, err, this.context);

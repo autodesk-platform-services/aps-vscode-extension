@@ -110,6 +110,7 @@ export async function activate(_context: vscode.ExtensionContext) {
 
 	const restorationServices = new Map<string, Promise<ReturnType<typeof createServices>>>();
 	const restorationTokenRequests = new Map<string, Promise<void>>();
+	let serviceEnvironment = env;
 	/**
 	 * Rebuilds every service for the given environment, restoring that environment's persisted session
 	 * (if any) as the user-context provider. This is the single place the active session is applied -
@@ -121,6 +122,8 @@ export async function activate(_context: vscode.ExtensionContext) {
 			? createSessionAuthenticationProvider(environment, session, updated => authProvider.updateStoredSession(environment, updated))
 			: undefined;
 		Object.assign(context, createServices(environment, userProvider));
+		serviceEnvironment = environment;
+		restorationServices.clear();
 		context.session = session;
 		updateUserSessionContext();
 	}
@@ -216,8 +219,8 @@ export async function activate(_context: vscode.ExtensionContext) {
 				}
 				const key = JSON.stringify(saved.environment);
 				const request = (restorationTokenRequests.get(key) ?? Promise.resolve()).then(async () => {
-					if (context.environment.title === environment.title && context.environment.clientId === environment.clientId
-						&& context.environment.host === environment.host && context.environment.region === environment.region) {
+					if (serviceEnvironment.title === environment.title && serviceEnvironment.clientId === environment.clientId
+						&& serviceEnvironment.host === environment.host && serviceEnvironment.region === environment.region) {
 						return context.modelDerivativeService.getViewerAccessToken(saved.urn);
 					}
 					let services = restorationServices.get(key);

@@ -294,7 +294,7 @@ export function createWebViewPanel<Props, Message = unknown>(context: IContext, 
                 #root { position: absolute; inset: 0; }
             </style>`;
         const encodedProps = Buffer.from(JSON.stringify(props)).toString('base64');
-        bootstrap = `const decodedProps = JSON.parse(atob('${encodedProps}'));
+        bootstrap = `const decodedProps = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob('${encodedProps}'), c => c.charCodeAt(0))));
                 render(document.getElementById('root'), decodedProps);`;
     } else {
         csp = `default-src 'none'; script-src 'nonce-${nonce}'; img-src data:`;

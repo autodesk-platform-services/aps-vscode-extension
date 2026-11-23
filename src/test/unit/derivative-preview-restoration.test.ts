@@ -7,7 +7,7 @@ import type { IDerivativePreviewState } from '../../webviews/derivative-preview'
 describe('derivative preview restoration', () => {
 	const state: IDerivativePreviewState = {
 		version: 1,
-		environment: { title: 'test', clientId: 'client', region: 'EMEA' },
+		environment: { title: '東京', clientId: 'client', region: 'EMEA' },
 		urn: 'model-urn',
 		guid: 'view-guid',
 		api: 'streamingV2_EU',
@@ -50,11 +50,12 @@ describe('derivative preview restoration', () => {
 			return 'fresh-token';
 		});
 		assert.deepStrictEqual(requested, { ...state, environment: { ...state.environment, host: undefined } });
-		const encoded = panel.webview.html.match(/JSON\.parse\(atob\('([^']+)'\)\)/)?.[1];
+		const encoded = panel.webview.html.match(/atob\('([^']+)'\)/)?.[1];
 		assert.ok(encoded);
 		const props = JSON.parse(Buffer.from(encoded, 'base64').toString());
 		assert.strictEqual(props.token, 'fresh-token');
 		assert.strictEqual(props.state.token, undefined);
+		assert.strictEqual(props.state.environment.title, '東京');
 		assert.strictEqual(props.state.urn, state.urn);
 		assert.strictEqual(props.state.guid, state.guid);
 		assert.deepStrictEqual(props.config.extensions, state.extensions);
