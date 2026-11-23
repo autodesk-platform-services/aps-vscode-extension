@@ -245,14 +245,16 @@ function withExtension(pathSegments: string[], extension: string): vscode.Uri {
 /** Pinned version of the APS Viewer; update on release. */
 export const VIEWER_VERSION = '7.110.0';
 
-export function createWebViewPanel<Props, Message = unknown>(context: IContext, scriptName: string, id: string, title: string, props: Props, onMessage?: (message: Message) => void, options?: { viewer?: boolean }): vscode.WebviewPanel {
+export function createWebViewPanel<Props, Message = unknown>(context: IContext, scriptName: string, id: string, title: string, props: Props, onMessage?: (message: Message) => void, options?: { viewer?: boolean; panel?: vscode.WebviewPanel }): vscode.WebviewPanel {
     const viewer = !!options?.viewer;
     let disposables: vscode.Disposable[] = [];
-    let panel = vscode.window.createWebviewPanel(id, title, vscode.ViewColumn.One, {
+    const webviewOptions: vscode.WebviewOptions & vscode.WebviewPanelOptions = {
         enableScripts: true, // Enable javascript in the webview
         localResourceRoots: [vscode.Uri.joinPath(context.extensionContext.extensionUri, 'out')], // Restrict the webview to only load resources from the `out` directory
         retainContextWhenHidden: true
-    });
+    };
+    let panel = options?.panel ?? vscode.window.createWebviewPanel(id, title, vscode.ViewColumn.One, webviewOptions);
+    panel.webview.options = webviewOptions;
     panel.onDidDispose(() => {
         while (disposables.length) {
             const disposable = disposables.pop();
@@ -305,7 +307,7 @@ export function createWebViewPanel<Props, Message = unknown>(context: IContext, 
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width,initial-scale=1.0">
             <meta http-equiv="Content-Security-Policy" content="${csp}">${headExtras}
-            <title>${title}</title>
+            <title>${title.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!))}</title>
         </head>
         <body>
             <div id="root"></div>

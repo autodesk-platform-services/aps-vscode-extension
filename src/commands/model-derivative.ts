@@ -4,7 +4,7 @@ import { ObjectDetails } from '../models/oss';
 import { ObjectTree, Properties, IDerivative, svf2 } from '../models/model-derivative';
 import { IContext, command, promptBucket, promptCustomDerivative, promptDerivative, promptObject, showErrorMessage } from '../common';
 import { withProgress, createWebViewPanel, showReadOnlyJson } from '../common';
-import type { IDerivativePreviewProps, IDerivativePreviewMessage } from '../webviews/derivative-preview';
+import type { IDerivativePreviewProps, IDerivativePreviewMessage, IDerivativePreviewState } from '../webviews/derivative-preview';
 import type { IThumbnailsProps, IThumbnailsMessage } from '../webviews/thumbnails';
 import type { ICustomDerivativeMessage, ICustomDerivativeProps } from '../webviews/custom-translation';
 import { IVersion } from '../models/hubs';
@@ -142,23 +142,52 @@ export class ModelDerivativesCommands {
 				}
 				// TODO: what about 'APAC'?
 			}
-			createWebViewPanel<IDerivativePreviewProps, IDerivativePreviewMessage>(this.context, 'derivative-preview.js', 'derivative-preview', `Preview: ${derivative.name}`, {
-				api, env,
-				token: accessToken,
+			const environment = this.context.environment;
+			const state: IDerivativePreviewState = {
+				version: 1,
+				environment: { title: environment.title, clientId: environment.clientId, host: environment.host, region: environment.region },
 				urn: derivative.urn,
 				guid: derivative.guid,
-				config: {
-					extensions: this.context.previewSettings.extensions
-				}
-			}, message => {
+				api, env,
+				extensions: this.context.previewSettings.extensions
+			};
+			this.showDerivativePreview(`Preview: ${derivative.name}`, state, accessToken);
+		} catch (err) {
+			showErrorMessage(`Could not access object`, err, this.context);
+		}
+	}
+
+	showDerivativePreview(title: string, state: IDerivativePreviewState, token: string, panel?: vscode.WebviewPanel) {
+		createWebViewPanel<IDerivativePreviewProps, IDerivativePreviewMessage>(this.context, 'derivative-preview.js', 'derivative-preview', title, {
+			api: state.api, env: state.env, token, urn: state.urn, guid: state.guid,
+			config: { extensions: state.extensions }, state
+		}, message => {
 				switch (message.type) {
 					case 'error':
 						showErrorMessage(`Could not load viewable`, message.error, this.context);
 						break;
 				}
-			}, { viewer: true });
+		}, { viewer: true, panel });
+	}
+
+	async restoreDerivativePreview(panel: vscode.WebviewPanel, state: unknown, getToken: (state: IDerivativePreviewState) => Promise<string>) {
+		try {
+			if (!isDerivativePreviewState(state)) {
+				throw new Error('The saved viewer state is invalid.');
+			}
+			const safeState: IDerivativePreviewState = {
+				version: 1,
+				environment: {
+					title: state.environment.title, clientId: state.environment.clientId,
+					host: state.environment.host, region: state.environment.region
+				},
+				urn: state.urn, guid: state.guid, api: state.api, env: state.env, extensions: state.extensions
+			};
+			const token = await getToken(safeState);
+			this.showDerivativePreview(panel.title, safeState, token, panel);
 		} catch (err) {
-			showErrorMessage(`Could not access object`, err, this.context);
+			panel.webview.html = '<!DOCTYPE html><html><body>Could not restore the viewer. Please reopen it from the tree view.</body></html>';
+			showErrorMessage('Could not restore viewer', err, this.context);
 		}
 	}
 
@@ -168,6 +197,7 @@ export class ModelDerivativesCommands {
 			if (!bucket) {
 				return;
 			}
+
 			const object = await promptObject(this.context, bucket.bucketKey);
 			if (!object) {
 				return;
@@ -471,6 +501,18 @@ export class ModelDerivativesCommands {
 		await vscode.env.clipboard.writeText(urn);
 		vscode.window.showInformationMessage(`Object URN copied to clipboard: ${urn}`);
 	}
+}
+
+function isDerivativePreviewState(value: unknown): value is IDerivativePreviewState {
+	const state = value as IDerivativePreviewState | null;
+	return !!state && state.version === 1 && !!state.environment
+		&& typeof state.environment.title === 'string' && typeof state.environment.clientId === 'string'
+		&& (state.environment.host === undefined || typeof state.environment.host === 'string')
+		&& (state.environment.region === undefined || typeof state.environment.region === 'string')
+		&& typeof state.urn === 'string' && state.urn.length > 0
+		&& (state.guid === undefined || typeof state.guid === 'string')
+		&& typeof state.api === 'string' && typeof state.env === 'string'
+		&& Array.isArray(state.extensions) && state.extensions.every(extension => typeof extension === 'string');
 }
 
 enum TranslationActions {

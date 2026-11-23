@@ -30,7 +30,8 @@
         "Other"
     ],
     "activationEvents": [
-        "onUri"
+        "onUri",
+        "onWebviewPanel:derivative-preview"
     ],
     "main": "./out/extension.js",
     "contributes": {
