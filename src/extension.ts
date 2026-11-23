@@ -108,6 +108,9 @@ export async function activate(_context: vscode.ExtensionContext) {
 		vscode.commands.executeCommand('setContext', 'aps:userSession', !!context.session);
 	}
 
+	const restorationServices = new Map<string, Promise<ReturnType<typeof createServices>>>();
+	const restorationTokenRequests = new Map<string, Promise<void>>();
+	let serviceEnvironment = env;
 	/**
 	 * Rebuilds every service for the given environment, restoring that environment's persisted session
 	 * (if any) as the user-context provider. This is the single place the active session is applied -
@@ -119,6 +122,8 @@ export async function activate(_context: vscode.ExtensionContext) {
 			? createSessionAuthenticationProvider(environment, session, updated => authProvider.updateStoredSession(environment, updated))
 			: undefined;
 		Object.assign(context, createServices(environment, userProvider));
+		serviceEnvironment = environment;
+		restorationServices.clear();
 		context.session = session;
 		updateUserSessionContext();
 	}
@@ -136,6 +141,7 @@ export async function activate(_context: vscode.ExtensionContext) {
 	// A session added/removed via the provider (sign-in/out, or the VS Code Accounts menu) rebuilds the
 	// services for the current environment and refreshes the user-context views.
 	context.extensionContext.subscriptions.push(authProvider.onDidChangeSessions(async () => {
+		restorationServices.clear();
 		await applySession(context.environment);
 		refreshUserViews();
 	}));
@@ -202,6 +208,47 @@ export async function activate(_context: vscode.ExtensionContext) {
 	await applySession(env);
 	refreshUserViews();
 
+	context.extensionContext.subscriptions.push(vscode.window.registerWebviewPanelSerializer('derivative-preview', {
+		async deserializeWebviewPanel(panel, state) {
+			await modelDerivativeCommands.restoreDerivativePreview(panel, state, async saved => {
+				const environment = getEnvironments().find(candidate =>
+					candidate.title === saved.environment.title && candidate.clientId === saved.environment.clientId
+					&& candidate.host === saved.environment.host && candidate.region === saved.environment.region);
+				if (!environment) {
+					throw new Error('The viewer’s original APS environment is no longer configured.');
+				}
+				const key = JSON.stringify(saved.environment);
+				const request = (restorationTokenRequests.get(key) ?? Promise.resolve()).then(async () => {
+					if (serviceEnvironment.title === environment.title && serviceEnvironment.clientId === environment.clientId
+						&& serviceEnvironment.host === environment.host && serviceEnvironment.region === environment.region) {
+						return context.modelDerivativeService.getViewerAccessToken(saved.urn);
+					}
+					let services = restorationServices.get(key);
+					if (!services) {
+						services = (async () => {
+							const session = await authProvider.getStoredSession(environment);
+							const userProvider = session
+								? createSessionAuthenticationProvider(environment, session, updated => authProvider.updateStoredSession(environment, updated))
+								: undefined;
+							return createServices(environment, userProvider);
+						})();
+						restorationServices.set(key, services);
+						services.catch(() => restorationServices.delete(key));
+					}
+					return (await services).modelDerivativeService.getViewerAccessToken(saved.urn);
+				});
+				const finished = request.then(() => {}, () => {});
+				restorationTokenRequests.set(key, finished);
+				finished.then(() => {
+					if (restorationTokenRequests.get(key) === finished) {
+						restorationTokenRequests.delete(key);
+					}
+				});
+				return request;
+			});
+		}
+	}));
+
 	// Hand-edited settings.json changes rebuild the services, status bar and views (same path as switching environments).
 	context.extensionContext.subscriptions.push(vscode.workspace.onDidChangeConfiguration(async event => {
 		if (!event.affectsConfiguration('autodesk.forge')) {
@@ -214,6 +261,7 @@ export async function activate(_context: vscode.ExtensionContext) {
 			api: config.get<string>('autodesk.forge.viewer.api')
 		};
 		if (event.affectsConfiguration('autodesk.forge.environments')) {
+			restorationServices.clear();
 			const updated = getEnvironments();
 			if (updated.length === 0) {
 				return; // keep the current environment until a new one is configured
