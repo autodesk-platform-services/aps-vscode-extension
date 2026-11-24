@@ -13,6 +13,7 @@ import { ApsAuthenticationProvider } from './auth-provider';
 import { SecureServiceAccountsDataProvider } from './providers/secure-service-accounts';
 import { HubAdminDataProvider } from './providers/hub-admin';
 import { TeamAdminDataProvider, TEAM_ADMIN_ENABLED_SETTING } from './providers/team-admin';
+import { TokenFlexDataProvider } from './providers/token-flex';
 import { ReadOnlyContentProvider, READONLY_SCHEME } from './providers/readonly-content';
 import { AuthenticationCommands } from './commands/authentication';
 import { ObjectStorageServiceCommands } from './commands/object-storage';
@@ -23,6 +24,7 @@ import { SecureServiceAccountsCommands } from './commands/secure-service-account
 import { WebhooksCommands } from './commands/webhooks';
 import { HubAdminCommands } from './commands/hub-admin';
 import { TeamAdminCommands } from './commands/team-admin';
+import { TokenFlexCommands } from './commands/token-flex';
 import { IssuesCommands } from './commands/issues';
 import { EnvironmentCommands } from './commands/environment';
 import { ApsLanguageModelTools } from './tools';
@@ -72,6 +74,7 @@ export async function activate(_context: vscode.ExtensionContext) {
 	const hubAdminAppDataProvider = new HubAdminDataProvider(context, 'app');
 	const hubAdminUserDataProvider = new HubAdminDataProvider(context, 'user');
 	const teamAdminDataProvider = new TeamAdminDataProvider(context);
+	const tokenFlexDataProvider = new TokenFlexDataProvider(context);
 	const providers: { viewId: string; provider: BaseTreeProvider<any>; user: boolean; dragAndDrop?: boolean }[] = [
 		{ viewId: 'apsDataManagementView', provider: simpleStorageDataProvider, user: false, dragAndDrop: true },
 		{ viewId: 'apsHubsView', provider: hubsDataProvider, user: true },
@@ -82,7 +85,8 @@ export async function activate(_context: vscode.ExtensionContext) {
 		{ viewId: 'apsSecureServiceAccountsView', provider: secureServiceAccountsProvider, user: false },
 		{ viewId: 'apsHubAdminAppView', provider: hubAdminAppDataProvider, user: false },
 		{ viewId: 'apsHubAdminUserView', provider: hubAdminUserDataProvider, user: true },
-		{ viewId: 'apsTeamAdminView', provider: teamAdminDataProvider, user: true }
+		{ viewId: 'apsTeamAdminView', provider: teamAdminDataProvider, user: true },
+		{ viewId: 'apsTokenFlexView', provider: tokenFlexDataProvider, user: true }
 	];
 	for (const { viewId, provider, dragAndDrop } of providers) {
 		const view = vscode.window.createTreeView(viewId, {
@@ -188,6 +192,9 @@ export async function activate(_context: vscode.ExtensionContext) {
 
 	const teamAdminCommands = new TeamAdminCommands(context, () => teamAdminDataProvider.refresh());
 	context.extensionContext.subscriptions.push(...teamAdminCommands.registerCommands());
+
+	const tokenFlexCommands = new TokenFlexCommands(context, () => tokenFlexDataProvider.refresh());
+	context.extensionContext.subscriptions.push(...tokenFlexCommands.registerCommands());
 
 	// Language model tools for operating on APS resources from VS Code chat (agent mode)
 	const languageModelTools = new ApsLanguageModelTools(context, () => simpleStorageDataProvider.refresh(), refreshWebhooks);

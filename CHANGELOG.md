@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- Added
+  - Token Flex (user) view for the Token Flex Usage Data API: browse contracts, contract years, monthly usage, and last updated dates, preview usage as charts, and run ad hoc usage queries
 - Fixed
   - Restore Model Derivative viewer panels after reloading the window
 

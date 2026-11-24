@@ -204,6 +204,11 @@
                     "id": "apsTeamAdminView",
                     "name": "%view.apsTeamAdminView.name%",
                     "icon": "$(organization)"
+                },
+                {
+                    "id": "apsTokenFlexView",
+                    "name": "%view.apsTokenFlexView.name%",
+                    "icon": "$(dashboard)"
                 }
             ]
         },
@@ -237,6 +242,11 @@
                 "view": "apsTeamAdminView",
                 "when": "aps:userSession && !config.autodesk.forge.enableTeamAdminApi",
                 "contents": "%viewsWelcome.apsTeamAdminView.5%"
+            },
+            {
+                "view": "apsTokenFlexView",
+                "when": "!aps:userSession",
+                "contents": "%viewsWelcome.apsTokenFlexView.6%"
             }
         ],
         "authentication": [
@@ -851,6 +861,42 @@
                 "title": "%command.aps.teamAdmin.unassignProduct.title%",
                 "category": "%category.TeamAdmin%",
                 "icon": "$(remove)"
+            },
+            {
+                "command": "aps.tokenFlex.refresh",
+                "title": "%command.aps.tokenFlex.refresh.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "aps.tokenFlex.viewContractDetails",
+                "title": "%command.aps.tokenFlex.viewContractDetails.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(eye)"
+            },
+            {
+                "command": "aps.tokenFlex.copyContractNumber",
+                "title": "%command.aps.tokenFlex.copyContractNumber.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(copy)"
+            },
+            {
+                "command": "aps.tokenFlex.viewUsageSummary",
+                "title": "%command.aps.tokenFlex.viewUsageSummary.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(graph)"
+            },
+            {
+                "command": "aps.tokenFlex.viewUsageChart",
+                "title": "%command.aps.tokenFlex.viewUsageChart.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(graph-line)"
+            },
+            {
+                "command": "aps.tokenFlex.runUsageQuery",
+                "title": "%command.aps.tokenFlex.runUsageQuery.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(search)"
             }
         ],
         "submenus": [
@@ -920,6 +966,30 @@
                 {
                     "command": "aps.teamAdmin.unassignProduct",
                     "when": "false"
+                },
+                {
+                    "command": "aps.tokenFlex.viewContractDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.tokenFlex.copyContractNumber",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.tokenFlex.refresh",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageSummary",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageChart",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.tokenFlex.runUsageQuery",
+                    "when": "aps:userSession"
                 }
             ],
             "view/title": [
@@ -940,7 +1010,7 @@
                 },
                 {
                     "command": "aps.auth.logout",
-                    "when": "(view == apsHubsView || view == apsIssuesView || view == apsWebhooksUserView || view == apsHubAdminUserView || view == apsTeamAdminView) && aps:userSession",
+                    "when": "(view == apsHubsView || view == apsIssuesView || view == apsWebhooksUserView || view == apsHubAdminUserView || view == apsTeamAdminView || view == apsTokenFlexView) && aps:userSession",
                     "group": "navigation"
                 },
                 {
@@ -966,6 +1036,11 @@
                 {
                     "command": "aps.teamAdmin.refresh",
                     "when": "view == apsTeamAdminView",
+                    "group": "navigation"
+                },
+                {
+                    "command": "aps.tokenFlex.refresh",
+                    "when": "view == apsTokenFlexView",
                     "group": "navigation"
                 }
             ],
@@ -1284,6 +1359,51 @@
                     "command": "aps.teamAdmin.unassignProduct",
                     "when": "view == apsTeamAdminView && viewItem == 'team-admin-assignment-direct'",
                     "group": "inline@1"
+                },
+                {
+                    "command": "aps.tokenFlex.viewContractDetails",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-contract'",
+                    "group": "0_view@1"
+                },
+                {
+                    "command": "aps.tokenFlex.copyContractNumber",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-contract'",
+                    "group": "0_view@2"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageSummary",
+                    "when": "view == apsTokenFlexView && (viewItem == 'token-flex-contract' || viewItem == 'token-flex-usage-summary-category')",
+                    "group": "0_view@3"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageChart",
+                    "when": "view == apsTokenFlexView && (viewItem == 'token-flex-contract' || viewItem == 'token-flex-usage-summary-category')",
+                    "group": "0_view@4"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageSummary",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-usage-summary-category'",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageChart",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-usage-summary-category'",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "aps.tokenFlex.runUsageQuery",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-contract'",
+                    "group": "1_action@1"
+                },
+                {
+                    "command": "aps.tokenFlex.runUsageQuery",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-contract'",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageChart",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-contract'",
+                    "group": "inline@2"
                 }
             ],
             "aps.submenu.view": [
@@ -1894,6 +2014,7 @@
         "@vscode-elements/react-elements": "^2.4.0",
         "@vscode/test-cli": "^0.0.15",
         "@vscode/test-electron": "^3.1.0",
+        "chart.js": "^4.6.2",
         "esbuild": "^0.28.1",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
