@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.9.0] - 2026-11-25
+
 - Added
   - Token Flex (user) view for the Token Flex Usage Data API: browse contracts, contract years, monthly usage, and last updated dates, preview usage as charts, and run ad hoc usage queries
   - Business Success Plan Reporting (user) view for the Business Success Plan Reporting API: browse teams and recent exports, run usage queries, preview usage as charts, and create and download usage exports
