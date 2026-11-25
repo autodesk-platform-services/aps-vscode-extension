@@ -327,12 +327,12 @@ export class ModelDerivativesCommands {
 	}
 
 	async viewObjectThumbnail(object?: ObjectDetails | IVersion) {
-		const downloadThumbnail = async (png: string, defaultUri: vscode.Uri) => {
+		const downloadThumbnail = async (png: Uint8Array, defaultUri: vscode.Uri) => {
 			const uri = await vscode.window.showSaveDialog({ defaultUri });
 			if (!uri) {
 				return;
 			}
-			await this.context.modelDerivativeService.saveToFile(uri.fsPath, Buffer.from(png, 'binary'));
+			await this.context.modelDerivativeService.saveToFile(uri.fsPath, png);
 			vscode.window.showInformationMessage(`Thumbnail downloaded: ${uri.fsPath}`);
 		};
 
@@ -360,7 +360,7 @@ export class ModelDerivativesCommands {
 				await this.context.modelDerivativeService.getObjectManifest(thumbnailObject); // Check if the manifest exists
 				return await this.context.modelDerivativeService.getObjectThumbnails(thumbnailObject);
 			});
-			const pngToDataURI = (img: string) => 'data:image/png;base64,' + Buffer.from(img, 'binary').toString('base64');
+			const pngToDataURI = (img: Buffer) => 'data:image/png;base64,' + img.toString('base64');
 			createWebViewPanel<IThumbnailsProps, IThumbnailsMessage>(this.context, 'thumbnails.js', 'thumbnails', `Thumbnails: ${key}`, {
 				objectKey: key,
 				smallDataURI: pngToDataURI(thumbnails[0]),
