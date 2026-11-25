@@ -1,5 +1,15 @@
 // @ts-nocheck
-import { postMessage } from './common';
+import { postMessage, setState } from './common';
+
+export interface IDerivativePreviewState {
+    version: 1;
+    environment: { title: string; clientId: string; host?: string; region?: string };
+    urn: string;
+    guid?: string;
+    api: string;
+    env: string;
+    extensions: string[];
+}
 
 export type IDerivativePreviewMessage = {
     type: 'error';
@@ -13,10 +23,12 @@ export interface IDerivativePreviewProps {
     urn: string;
     guid?: string;
     config?: any;
+    state: IDerivativePreviewState;
 }
 
 export function render(container: HTMLElement, props: IDerivativePreviewProps) {
     const { api, env, token, urn, guid, config } = props;
+    setState(props.state);
     Autodesk.Viewing.Initializer({ api, env, accessToken: token }, function () {
         const viewer = new Autodesk.Viewing.GuiViewer3D(container, config);
         viewer.start();

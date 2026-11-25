@@ -6,7 +6,7 @@
     "description": "%extension.description%",
     "author": "Petr Broz <petr.broz@autodesk.com>",
     "license": "MIT",
-    "version": "3.8.2",
+    "version": "3.9.0",
     "homepage": "https://marketplace.visualstudio.com/items?itemName=petrbroz.vscode-forge-tools",
     "repository": {
         "type": "git",
@@ -30,7 +30,8 @@
         "Other"
     ],
     "activationEvents": [
-        "onUri"
+        "onUri",
+        "onWebviewPanel:derivative-preview"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -203,6 +204,16 @@
                     "id": "apsTeamAdminView",
                     "name": "%view.apsTeamAdminView.name%",
                     "icon": "$(organization)"
+                },
+                {
+                    "id": "apsTokenFlexView",
+                    "name": "%view.apsTokenFlexView.name%",
+                    "icon": "$(dashboard)"
+                },
+                {
+                    "id": "apsBspReportingView",
+                    "name": "%view.apsBspReportingView.name%",
+                    "icon": "$(graph)"
                 }
             ]
         },
@@ -236,6 +247,16 @@
                 "view": "apsTeamAdminView",
                 "when": "aps:userSession && !config.autodesk.forge.enableTeamAdminApi",
                 "contents": "%viewsWelcome.apsTeamAdminView.5%"
+            },
+            {
+                "view": "apsTokenFlexView",
+                "when": "!aps:userSession",
+                "contents": "%viewsWelcome.apsTokenFlexView.6%"
+            },
+            {
+                "view": "apsBspReportingView",
+                "when": "!aps:userSession",
+                "contents": "%viewsWelcome.apsBspReportingView.7%"
             }
         ],
         "authentication": [
@@ -850,6 +871,84 @@
                 "title": "%command.aps.teamAdmin.unassignProduct.title%",
                 "category": "%category.TeamAdmin%",
                 "icon": "$(remove)"
+            },
+            {
+                "command": "aps.tokenFlex.refresh",
+                "title": "%command.aps.tokenFlex.refresh.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "aps.tokenFlex.viewContractDetails",
+                "title": "%command.aps.tokenFlex.viewContractDetails.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(eye)"
+            },
+            {
+                "command": "aps.tokenFlex.copyContractNumber",
+                "title": "%command.aps.tokenFlex.copyContractNumber.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(copy)"
+            },
+            {
+                "command": "aps.tokenFlex.viewUsageSummary",
+                "title": "%command.aps.tokenFlex.viewUsageSummary.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(graph)"
+            },
+            {
+                "command": "aps.tokenFlex.viewUsageChart",
+                "title": "%command.aps.tokenFlex.viewUsageChart.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(graph-line)"
+            },
+            {
+                "command": "aps.tokenFlex.runUsageQuery",
+                "title": "%command.aps.tokenFlex.runUsageQuery.title%",
+                "category": "%category.TokenFlex%",
+                "icon": "$(search)"
+            },
+            {
+                "command": "aps.bspReporting.refresh",
+                "title": "%command.aps.bspReporting.refresh.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "aps.bspReporting.copyTeamId",
+                "title": "%command.aps.bspReporting.copyTeamId.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(copy)"
+            },
+            {
+                "command": "aps.bspReporting.runUsageQuery",
+                "title": "%command.aps.bspReporting.runUsageQuery.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(search)"
+            },
+            {
+                "command": "aps.bspReporting.viewUsageChart",
+                "title": "%command.aps.bspReporting.viewUsageChart.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(graph-line)"
+            },
+            {
+                "command": "aps.bspReporting.createExport",
+                "title": "%command.aps.bspReporting.createExport.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(export)"
+            },
+            {
+                "command": "aps.bspReporting.viewExportDetails",
+                "title": "%command.aps.bspReporting.viewExportDetails.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(eye)"
+            },
+            {
+                "command": "aps.bspReporting.downloadExport",
+                "title": "%command.aps.bspReporting.downloadExport.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(cloud-download)"
             }
         ],
         "submenus": [
@@ -919,6 +1018,58 @@
                 {
                     "command": "aps.teamAdmin.unassignProduct",
                     "when": "false"
+                },
+                {
+                    "command": "aps.tokenFlex.viewContractDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.tokenFlex.copyContractNumber",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.tokenFlex.refresh",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageSummary",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageChart",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.tokenFlex.runUsageQuery",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.bspReporting.copyTeamId",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.bspReporting.viewExportDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.bspReporting.refresh",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.bspReporting.runUsageQuery",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.bspReporting.viewUsageChart",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.bspReporting.createExport",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.bspReporting.downloadExport",
+                    "when": "aps:userSession"
                 }
             ],
             "view/title": [
@@ -939,7 +1090,7 @@
                 },
                 {
                     "command": "aps.auth.logout",
-                    "when": "(view == apsHubsView || view == apsIssuesView || view == apsWebhooksUserView || view == apsHubAdminUserView || view == apsTeamAdminView) && aps:userSession",
+                    "when": "(view == apsHubsView || view == apsIssuesView || view == apsWebhooksUserView || view == apsHubAdminUserView || view == apsTeamAdminView || view == apsTokenFlexView || view == apsBspReportingView) && aps:userSession",
                     "group": "navigation"
                 },
                 {
@@ -965,6 +1116,16 @@
                 {
                     "command": "aps.teamAdmin.refresh",
                     "when": "view == apsTeamAdminView",
+                    "group": "navigation"
+                },
+                {
+                    "command": "aps.tokenFlex.refresh",
+                    "when": "view == apsTokenFlexView",
+                    "group": "navigation"
+                },
+                {
+                    "command": "aps.bspReporting.refresh",
+                    "when": "view == apsBspReportingView",
                     "group": "navigation"
                 }
             ],
@@ -1282,6 +1443,101 @@
                 {
                     "command": "aps.teamAdmin.unassignProduct",
                     "when": "view == apsTeamAdminView && viewItem == 'team-admin-assignment-direct'",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "aps.tokenFlex.viewContractDetails",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-contract'",
+                    "group": "0_view@1"
+                },
+                {
+                    "command": "aps.tokenFlex.copyContractNumber",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-contract'",
+                    "group": "0_view@2"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageSummary",
+                    "when": "view == apsTokenFlexView && (viewItem == 'token-flex-contract' || viewItem == 'token-flex-usage-summary-category')",
+                    "group": "0_view@3"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageChart",
+                    "when": "view == apsTokenFlexView && (viewItem == 'token-flex-contract' || viewItem == 'token-flex-usage-summary-category')",
+                    "group": "0_view@4"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageSummary",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-usage-summary-category'",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageChart",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-usage-summary-category'",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "aps.tokenFlex.runUsageQuery",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-contract'",
+                    "group": "1_action@1"
+                },
+                {
+                    "command": "aps.tokenFlex.runUsageQuery",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-contract'",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "aps.tokenFlex.viewUsageChart",
+                    "when": "view == apsTokenFlexView && viewItem == 'token-flex-contract'",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "aps.bspReporting.copyTeamId",
+                    "when": "view == apsBspReportingView && viewItem == 'bsp-reporting-team'",
+                    "group": "0_view@1"
+                },
+                {
+                    "command": "aps.bspReporting.runUsageQuery",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-teams-category')",
+                    "group": "1_action@1"
+                },
+                {
+                    "command": "aps.bspReporting.viewUsageChart",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-teams-category')",
+                    "group": "0_view@2"
+                },
+                {
+                    "command": "aps.bspReporting.createExport",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-exports-category')",
+                    "group": "1_action@2"
+                },
+                {
+                    "command": "aps.bspReporting.runUsageQuery",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-teams-category')",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "aps.bspReporting.createExport",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-exports-category')",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "aps.bspReporting.viewUsageChart",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-teams-category')",
+                    "group": "inline@3"
+                },
+                {
+                    "command": "aps.bspReporting.viewExportDetails",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-export' || viewItem == 'bsp-reporting-export-completed')",
+                    "group": "0_view@1"
+                },
+                {
+                    "command": "aps.bspReporting.downloadExport",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-export-completed' || viewItem == 'bsp-reporting-download')",
+                    "group": "1_action@1"
+                },
+                {
+                    "command": "aps.bspReporting.downloadExport",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-export-completed' || viewItem == 'bsp-reporting-download')",
                     "group": "inline@1"
                 }
             ],
@@ -1893,6 +2149,7 @@
         "@vscode-elements/react-elements": "^2.4.0",
         "@vscode/test-cli": "^0.0.15",
         "@vscode/test-electron": "^3.1.0",
+        "chart.js": "^4.6.2",
         "esbuild": "^0.28.1",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",

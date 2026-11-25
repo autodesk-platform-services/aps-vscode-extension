@@ -13,6 +13,8 @@ import { ApsAuthenticationProvider } from './auth-provider';
 import { SecureServiceAccountsDataProvider } from './providers/secure-service-accounts';
 import { HubAdminDataProvider } from './providers/hub-admin';
 import { TeamAdminDataProvider, TEAM_ADMIN_ENABLED_SETTING } from './providers/team-admin';
+import { TokenFlexDataProvider } from './providers/token-flex';
+import { BspReportingDataProvider } from './providers/bsp-reporting';
 import { ReadOnlyContentProvider, READONLY_SCHEME } from './providers/readonly-content';
 import { AuthenticationCommands } from './commands/authentication';
 import { ObjectStorageServiceCommands } from './commands/object-storage';
@@ -23,6 +25,8 @@ import { SecureServiceAccountsCommands } from './commands/secure-service-account
 import { WebhooksCommands } from './commands/webhooks';
 import { HubAdminCommands } from './commands/hub-admin';
 import { TeamAdminCommands } from './commands/team-admin';
+import { TokenFlexCommands } from './commands/token-flex';
+import { BspReportingCommands } from './commands/bsp-reporting';
 import { IssuesCommands } from './commands/issues';
 import { EnvironmentCommands } from './commands/environment';
 import { ApsLanguageModelTools } from './tools';
@@ -72,6 +76,8 @@ export async function activate(_context: vscode.ExtensionContext) {
 	const hubAdminAppDataProvider = new HubAdminDataProvider(context, 'app');
 	const hubAdminUserDataProvider = new HubAdminDataProvider(context, 'user');
 	const teamAdminDataProvider = new TeamAdminDataProvider(context);
+	const tokenFlexDataProvider = new TokenFlexDataProvider(context);
+	const bspReportingDataProvider = new BspReportingDataProvider(context);
 	const providers: { viewId: string; provider: BaseTreeProvider<any>; user: boolean; dragAndDrop?: boolean }[] = [
 		{ viewId: 'apsDataManagementView', provider: simpleStorageDataProvider, user: false, dragAndDrop: true },
 		{ viewId: 'apsHubsView', provider: hubsDataProvider, user: true },
@@ -82,7 +88,9 @@ export async function activate(_context: vscode.ExtensionContext) {
 		{ viewId: 'apsSecureServiceAccountsView', provider: secureServiceAccountsProvider, user: false },
 		{ viewId: 'apsHubAdminAppView', provider: hubAdminAppDataProvider, user: false },
 		{ viewId: 'apsHubAdminUserView', provider: hubAdminUserDataProvider, user: true },
-		{ viewId: 'apsTeamAdminView', provider: teamAdminDataProvider, user: true }
+		{ viewId: 'apsTeamAdminView', provider: teamAdminDataProvider, user: true },
+		{ viewId: 'apsTokenFlexView', provider: tokenFlexDataProvider, user: true },
+		{ viewId: 'apsBspReportingView', provider: bspReportingDataProvider, user: true }
 	];
 	for (const { viewId, provider, dragAndDrop } of providers) {
 		const view = vscode.window.createTreeView(viewId, {
@@ -108,6 +116,9 @@ export async function activate(_context: vscode.ExtensionContext) {
 		vscode.commands.executeCommand('setContext', 'aps:userSession', !!context.session);
 	}
 
+	const restorationServices = new Map<string, Promise<ReturnType<typeof createServices>>>();
+	const restorationTokenRequests = new Map<string, Promise<void>>();
+	let serviceEnvironment = env;
 	/**
 	 * Rebuilds every service for the given environment, restoring that environment's persisted session
 	 * (if any) as the user-context provider. This is the single place the active session is applied -
@@ -119,6 +130,8 @@ export async function activate(_context: vscode.ExtensionContext) {
 			? createSessionAuthenticationProvider(environment, session, updated => authProvider.updateStoredSession(environment, updated))
 			: undefined;
 		Object.assign(context, createServices(environment, userProvider));
+		serviceEnvironment = environment;
+		restorationServices.clear();
 		context.session = session;
 		updateUserSessionContext();
 	}
@@ -136,6 +149,7 @@ export async function activate(_context: vscode.ExtensionContext) {
 	// A session added/removed via the provider (sign-in/out, or the VS Code Accounts menu) rebuilds the
 	// services for the current environment and refreshes the user-context views.
 	context.extensionContext.subscriptions.push(authProvider.onDidChangeSessions(async () => {
+		restorationServices.clear();
 		await applySession(context.environment);
 		refreshUserViews();
 	}));
@@ -183,6 +197,12 @@ export async function activate(_context: vscode.ExtensionContext) {
 	const teamAdminCommands = new TeamAdminCommands(context, () => teamAdminDataProvider.refresh());
 	context.extensionContext.subscriptions.push(...teamAdminCommands.registerCommands());
 
+	const tokenFlexCommands = new TokenFlexCommands(context, () => tokenFlexDataProvider.refresh());
+	context.extensionContext.subscriptions.push(...tokenFlexCommands.registerCommands());
+
+	const bspReportingCommands = new BspReportingCommands(context, () => bspReportingDataProvider.refresh());
+	context.extensionContext.subscriptions.push(...bspReportingCommands.registerCommands());
+
 	// Language model tools for operating on APS resources from VS Code chat (agent mode)
 	const languageModelTools = new ApsLanguageModelTools(context, () => simpleStorageDataProvider.refresh(), refreshWebhooks);
 	context.extensionContext.subscriptions.push(...languageModelTools.registerTools());
@@ -202,6 +222,47 @@ export async function activate(_context: vscode.ExtensionContext) {
 	await applySession(env);
 	refreshUserViews();
 
+	context.extensionContext.subscriptions.push(vscode.window.registerWebviewPanelSerializer('derivative-preview', {
+		async deserializeWebviewPanel(panel, state) {
+			await modelDerivativeCommands.restoreDerivativePreview(panel, state, async saved => {
+				const environment = getEnvironments().find(candidate =>
+					candidate.title === saved.environment.title && candidate.clientId === saved.environment.clientId
+					&& candidate.host === saved.environment.host && candidate.region === saved.environment.region);
+				if (!environment) {
+					throw new Error('The viewer’s original APS environment is no longer configured.');
+				}
+				const key = JSON.stringify(saved.environment);
+				const request = (restorationTokenRequests.get(key) ?? Promise.resolve()).then(async () => {
+					if (serviceEnvironment.title === environment.title && serviceEnvironment.clientId === environment.clientId
+						&& serviceEnvironment.host === environment.host && serviceEnvironment.region === environment.region) {
+						return context.modelDerivativeService.getViewerAccessToken(saved.urn);
+					}
+					let services = restorationServices.get(key);
+					if (!services) {
+						services = (async () => {
+							const session = await authProvider.getStoredSession(environment);
+							const userProvider = session
+								? createSessionAuthenticationProvider(environment, session, updated => authProvider.updateStoredSession(environment, updated))
+								: undefined;
+							return createServices(environment, userProvider);
+						})();
+						restorationServices.set(key, services);
+						services.catch(() => restorationServices.delete(key));
+					}
+					return (await services).modelDerivativeService.getViewerAccessToken(saved.urn);
+				});
+				const finished = request.then(() => {}, () => {});
+				restorationTokenRequests.set(key, finished);
+				finished.then(() => {
+					if (restorationTokenRequests.get(key) === finished) {
+						restorationTokenRequests.delete(key);
+					}
+				});
+				return request;
+			});
+		}
+	}));
+
 	// Hand-edited settings.json changes rebuild the services, status bar and views (same path as switching environments).
 	context.extensionContext.subscriptions.push(vscode.workspace.onDidChangeConfiguration(async event => {
 		if (!event.affectsConfiguration('autodesk.forge')) {
@@ -214,6 +275,7 @@ export async function activate(_context: vscode.ExtensionContext) {
 			api: config.get<string>('autodesk.forge.viewer.api')
 		};
 		if (event.affectsConfiguration('autodesk.forge.environments')) {
+			restorationServices.clear();
 			const updated = getEnvironments();
 			if (updated.length === 0) {
 				return; // keep the current environment until a new one is configured

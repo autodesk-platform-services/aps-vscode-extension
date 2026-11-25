@@ -23,6 +23,8 @@ import { WebhooksService } from './webhooks';
 import { IssuesService } from './issues';
 import { HubAdminService } from './hub-admin';
 import { TeamAdminService } from './team-admin';
+import { TokenFlexService } from './token-flex';
+import { BspReportingService } from './bsp-reporting';
 
 const OSS_SCOPES: string[] = [Scopes.BucketCreate, Scopes.BucketRead, Scopes.BucketUpdate, Scopes.BucketDelete, Scopes.DataRead, Scopes.DataWrite, Scopes.DataCreate];
 const MODEL_DERIVATIVE_SCOPES: string[] = [Scopes.DataRead, Scopes.DataWrite, Scopes.DataCreate, Scopes.ViewablesRead];
@@ -45,6 +47,8 @@ export interface IServices {
     hubAdminServiceApp: HubAdminService;  // Hub Admin (app) view - account/project/company data (2-legged)
     hubAdminServiceUser: HubAdminService; // Hub Admin (user) view - account/project/company data (active session)
     teamAdminService: TeamAdminService; // Team Admin (user) view - team users and product seats (user context only)
+    tokenFlexService: TokenFlexService; // Token Flex (user) view - Token Flex contracts and usage (user context only)
+    bspReportingService: BspReportingService; // Business Success Plan Reporting (user) view - Business Success Plan usage queries and exports (user context only)
 }
 
 /**
@@ -147,6 +151,8 @@ export function createServices(env: IEnvironment, userProvider?: IAuthentication
             authenticationProvider: new ClientCredentialsAuthenticationProvider(env.clientId, env.clientSecret, HUB_ADMIN_SCOPES, env.host)
         })),
         hubAdminServiceUser: new HubAdminService(new AdminClient({ sdkManager, authenticationProvider: user })),
-        teamAdminService: new TeamAdminService(user, env.host)
+        teamAdminService: new TeamAdminService(user, env.host),
+        tokenFlexService: new TokenFlexService(user, env.host),
+        bspReportingService: new BspReportingService(user, env.host)
     };
 }
