@@ -1,18 +1,9 @@
 import { TokenFlexContractYear, TokenFlexUsageSummary } from '../models/token-flex';
+import { IChartData, ISeries } from './chart-data';
+
+export type { IChartData, ISeries } from './chart-data';
 
 export type UsageMetric = 'tokensConsumed' | 'uniqueUsers';
-
-export interface ISeries {
-    label: string;
-    data: number[];
-    /** Series with the same stack ID are stacked on top of each other (in stacked charts). */
-    stack?: string;
-}
-
-export interface IChartData {
-    labels: string[];
-    series: ISeries[];
-}
 
 /** Formats a `YYYY-MM-DD` usage month as `YYYY-MM`. */
 function toMonth(usageMonth: string): string {

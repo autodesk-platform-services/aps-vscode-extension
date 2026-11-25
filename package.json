@@ -209,6 +209,11 @@
                     "id": "apsTokenFlexView",
                     "name": "%view.apsTokenFlexView.name%",
                     "icon": "$(dashboard)"
+                },
+                {
+                    "id": "apsBspReportingView",
+                    "name": "%view.apsBspReportingView.name%",
+                    "icon": "$(graph)"
                 }
             ]
         },
@@ -247,6 +252,11 @@
                 "view": "apsTokenFlexView",
                 "when": "!aps:userSession",
                 "contents": "%viewsWelcome.apsTokenFlexView.6%"
+            },
+            {
+                "view": "apsBspReportingView",
+                "when": "!aps:userSession",
+                "contents": "%viewsWelcome.apsBspReportingView.7%"
             }
         ],
         "authentication": [
@@ -897,6 +907,48 @@
                 "title": "%command.aps.tokenFlex.runUsageQuery.title%",
                 "category": "%category.TokenFlex%",
                 "icon": "$(search)"
+            },
+            {
+                "command": "aps.bspReporting.refresh",
+                "title": "%command.aps.bspReporting.refresh.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "aps.bspReporting.copyTeamId",
+                "title": "%command.aps.bspReporting.copyTeamId.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(copy)"
+            },
+            {
+                "command": "aps.bspReporting.runUsageQuery",
+                "title": "%command.aps.bspReporting.runUsageQuery.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(search)"
+            },
+            {
+                "command": "aps.bspReporting.viewUsageChart",
+                "title": "%command.aps.bspReporting.viewUsageChart.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(graph-line)"
+            },
+            {
+                "command": "aps.bspReporting.createExport",
+                "title": "%command.aps.bspReporting.createExport.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(export)"
+            },
+            {
+                "command": "aps.bspReporting.viewExportDetails",
+                "title": "%command.aps.bspReporting.viewExportDetails.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(eye)"
+            },
+            {
+                "command": "aps.bspReporting.downloadExport",
+                "title": "%command.aps.bspReporting.downloadExport.title%",
+                "category": "%category.BspReporting%",
+                "icon": "$(cloud-download)"
             }
         ],
         "submenus": [
@@ -990,6 +1042,34 @@
                 {
                     "command": "aps.tokenFlex.runUsageQuery",
                     "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.bspReporting.copyTeamId",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.bspReporting.viewExportDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.bspReporting.refresh",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.bspReporting.runUsageQuery",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.bspReporting.viewUsageChart",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.bspReporting.createExport",
+                    "when": "aps:userSession"
+                },
+                {
+                    "command": "aps.bspReporting.downloadExport",
+                    "when": "aps:userSession"
                 }
             ],
             "view/title": [
@@ -1010,7 +1090,7 @@
                 },
                 {
                     "command": "aps.auth.logout",
-                    "when": "(view == apsHubsView || view == apsIssuesView || view == apsWebhooksUserView || view == apsHubAdminUserView || view == apsTeamAdminView || view == apsTokenFlexView) && aps:userSession",
+                    "when": "(view == apsHubsView || view == apsIssuesView || view == apsWebhooksUserView || view == apsHubAdminUserView || view == apsTeamAdminView || view == apsTokenFlexView || view == apsBspReportingView) && aps:userSession",
                     "group": "navigation"
                 },
                 {
@@ -1041,6 +1121,11 @@
                 {
                     "command": "aps.tokenFlex.refresh",
                     "when": "view == apsTokenFlexView",
+                    "group": "navigation"
+                },
+                {
+                    "command": "aps.bspReporting.refresh",
+                    "when": "view == apsBspReportingView",
                     "group": "navigation"
                 }
             ],
@@ -1404,6 +1489,56 @@
                     "command": "aps.tokenFlex.viewUsageChart",
                     "when": "view == apsTokenFlexView && viewItem == 'token-flex-contract'",
                     "group": "inline@2"
+                },
+                {
+                    "command": "aps.bspReporting.copyTeamId",
+                    "when": "view == apsBspReportingView && viewItem == 'bsp-reporting-team'",
+                    "group": "0_view@1"
+                },
+                {
+                    "command": "aps.bspReporting.runUsageQuery",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-teams-category')",
+                    "group": "1_action@1"
+                },
+                {
+                    "command": "aps.bspReporting.viewUsageChart",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-teams-category')",
+                    "group": "0_view@2"
+                },
+                {
+                    "command": "aps.bspReporting.createExport",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-exports-category')",
+                    "group": "1_action@2"
+                },
+                {
+                    "command": "aps.bspReporting.runUsageQuery",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-teams-category')",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "aps.bspReporting.createExport",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-exports-category')",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "aps.bspReporting.viewUsageChart",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-team' || viewItem == 'bsp-reporting-teams-category')",
+                    "group": "inline@3"
+                },
+                {
+                    "command": "aps.bspReporting.viewExportDetails",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-export' || viewItem == 'bsp-reporting-export-completed')",
+                    "group": "0_view@1"
+                },
+                {
+                    "command": "aps.bspReporting.downloadExport",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-export-completed' || viewItem == 'bsp-reporting-download')",
+                    "group": "1_action@1"
+                },
+                {
+                    "command": "aps.bspReporting.downloadExport",
+                    "when": "view == apsBspReportingView && (viewItem == 'bsp-reporting-export-completed' || viewItem == 'bsp-reporting-download')",
+                    "group": "inline@1"
                 }
             ],
             "aps.submenu.view": [

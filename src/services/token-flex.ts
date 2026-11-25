@@ -14,7 +14,7 @@ import {
     TokenFlexUsageSummary,
     TokenFlexUsageSummaryFilter
 } from '../models/token-flex';
-import { RestClient } from './rest-client';
+import { RestClient, delay } from './rest-client';
 
 const DEFAULT_HOST = 'https://developer.api.autodesk.com';
 const QUERY_PAGE_LIMIT = 1000;
@@ -134,22 +134,4 @@ export class TokenFlexService {
         }
         return { id: queryId, columns, rows };
     }
-}
-
-function delay(ms: number, signal?: AbortSignal): Promise<void> {
-    return new Promise((resolve, reject) => {
-        if (signal?.aborted) {
-            reject(signal.reason);
-            return;
-        }
-        const timer = setTimeout(() => {
-            signal?.removeEventListener('abort', onAbort);
-            resolve();
-        }, ms);
-        const onAbort = () => {
-            clearTimeout(timer);
-            reject(signal!.reason);
-        };
-        signal?.addEventListener('abort', onAbort, { once: true });
-    });
 }
