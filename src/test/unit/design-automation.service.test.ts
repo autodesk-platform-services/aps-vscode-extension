@@ -172,9 +172,31 @@ describe('DesignAutomationService', () => {
 				return { ok: true, text: async () => 'my-nickname' };
 			}) as any;
 
-			const service = new DesignAutomationService(fakeAuthProvider as any, 'https://example.com', 'EMEA' as any);
+			const service = new DesignAutomationService(fakeAuthProvider as any, 'https://example.com/', 'custom-region');
 			assert.strictEqual(await service.getNickname(), 'my-nickname');
-			assert.strictEqual(requestedUrl, 'https://example.com/da/EMEA/v3/forgeapps/me');
+			assert.strictEqual(requestedUrl, 'https://example.com/da/custom-region/v3/forgeapps/me');
+		});
+
+		it('uses the default host and region when none are configured', async () => {
+			let requestedUrl: string | undefined;
+			global.fetch = (async (url: string) => {
+				requestedUrl = url;
+				return { ok: true, text: async () => 'nickname' };
+			}) as any;
+
+			await new DesignAutomationService(fakeAuthProvider as any).getNickname();
+			assert.strictEqual(requestedUrl, 'https://developer.api.autodesk.com/da/us-east/v3/forgeapps/me');
+		});
+
+		it('uses the full endpoint in preference to the host and region', async () => {
+			let requestedUrl: string | undefined;
+			global.fetch = (async (url: string) => {
+				requestedUrl = url;
+				return { ok: true, text: async () => 'nickname' };
+			}) as any;
+
+			await new DesignAutomationService(fakeAuthProvider as any, 'https://aps.example.com', 'us-west', 'https://da.example.com/custom/path/v3/').getNickname();
+			assert.strictEqual(requestedUrl, 'https://da.example.com/custom/path/v3/forgeapps/me');
 		});
 	});
 });

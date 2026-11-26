@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- Added
+  - Custom Design Automation endpoints and regions per environment
 - Fixed
   - Model Derivative thumbnails not displaying (PNG data was corrupted when downloaded)
 

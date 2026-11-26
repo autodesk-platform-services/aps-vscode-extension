@@ -57,7 +57,8 @@ The extension exposes the following settings:
   - `clientSecret` (required): APS client secret
   - `host`: APS host URL (default `https://developer.api.autodesk.com`)
   - `region`: data region for storing design data; can be `US` (default), `EMEA`, `AUS`, `CAN`, `DEU`, `IND`, `JPN`, or `GBR`
-  - `designAutomationRegion`: Design Automation region; can be `us-east` (default) or `us-west`
+  - `designAutomationRegion`: Design Automation region (default `us-east`), for example `us-west` or another supported region
+  - `designAutomationEndpoint`: full Design Automation API base URL, e.g. `https://developer.api.autodesk.com/da/us-east/v3`. When set, it overrides `host` and `designAutomationRegion` for Design Automation calls only; authentication and OSS still use `host`. Only use an endpoint you trust with your APS access token.
 - `autodesk.forge.data.defaultContentType`: content type to use for all files and empty objects uploaded to OSS (default `application/octet-stream`)
 - `autodesk.forge.data.uploadChunkSize`: size of individual chunks (in bytes) when uploading files to OSS with the resumable functionality (default `2097152`)
 - `autodesk.forge.data.pageSize`: number of buckets or objects to fetch per page in the _Data & Derivatives (app)_ view before showing a "Load more" item (default `32`)
@@ -133,7 +134,7 @@ The _Webhooks (app)_ and _Webhooks (user)_ views can be used to browse and manag
 
 ### Automation (app) view
 
-The _Automation (app)_ view can be used for browsing [Design Automation](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/overview) entities such as app bundles and activities, creating and updating them (including their aliases and versions), and submitting work items against an activity. Work item progress is shown in a notification that can be cancelled. The view also provides a context menu for viewing additional details of individual bundles or activities. The Design Automation region is configured per environment (see `designAutomationRegion` in [Extension settings](#extension-settings)).
+The _Automation (app)_ view can be used for browsing [Design Automation](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/overview) entities such as app bundles and activities, creating and updating them (including their aliases and versions), and submitting work items against an activity. Work item progress is shown in a notification that can be cancelled. The view also provides a context menu for viewing additional details of individual bundles or activities. The Design Automation region or endpoint is configured per environment (see [Extension settings](#extension-settings)).
 
 ### Secure Service Accounts (app) view
 

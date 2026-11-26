@@ -6,7 +6,7 @@ import { WebhooksClient } from '@aps_sdk/webhooks';
 import { DataManagementClient } from '@aps_sdk/data-management';
 import { IssuesClient } from '@aps_sdk/construction-issues';
 import { AdminClient } from '@aps_sdk/construction-account-admin';
-import { DesignAutomationRegion, IEnvironment } from '../models/environment';
+import { IEnvironment } from '../models/environment';
 import { IApsAuthSession } from '../models/authentication';
 import { createApsSdkManager } from './aps-sdk-manager';
 import { ClientCredentialsAuthenticationProvider } from './client-credentials-authentication-provider';
@@ -135,7 +135,8 @@ export function createServices(env: IEnvironment, userProvider?: IAuthentication
         designAutomationService: new DesignAutomationService(
             new ClientCredentialsAuthenticationProvider(env.clientId, env.clientSecret, DESIGN_AUTOMATION_SCOPES, env.host),
             env.host,
-            env.designAutomationRegion as DesignAutomationRegion
+            env.designAutomationRegion,
+            env.designAutomationEndpoint
         ),
         webhooksServiceApp: new WebhooksService(new WebhooksClient({
             sdkManager,
