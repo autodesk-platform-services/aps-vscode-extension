@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { randomUUID } from 'crypto';
+import * as path from 'path';
 import { BucketsItems, ObjectDetails } from './models/oss';
 import { urnify } from './urn';
 import { IDerivative } from './models/model-derivative';
@@ -10,6 +11,8 @@ import { readOnlyUri, ReadOnlyContentProvider } from './providers/readonly-conte
 
 export interface IPreviewSettings {
     extensions: string[];
+    /** Additional scripts (`https://` URLs or local file paths) loaded into the viewer before it starts. */
+    scripts: string[];
     env?: string;
     api?: string;
 }
@@ -245,12 +248,86 @@ function withExtension(pathSegments: string[], extension: string): vscode.Uri {
 /** Pinned version of the APS Viewer; update on release. */
 export const VIEWER_VERSION = '7.110.0';
 
-export function createWebViewPanel<Props, Message = unknown>(context: IContext, scriptName: string, id: string, title: string, props: Props, onMessage?: (message: Message) => void, options?: { viewer?: boolean; panel?: vscode.WebviewPanel }): vscode.WebviewPanel {
+export interface IResolvedViewerScripts {
+    /** Remote `https://` script URLs. */
+    remote: URL[];
+    /** Absolute paths of local script files. */
+    local: string[];
+    /** Entries that are neither `https://` URLs nor resolvable file paths. */
+    invalid: string[];
+}
+
+/**
+ * Sorts the entries of the `autodesk.forge.viewer.scripts` setting into remote URLs and local file paths.
+ * Relative paths are resolved against `workspaceRoot`; without a workspace, only absolute paths are accepted.
+ */
+export function resolveViewerScripts(scripts: string[], workspaceRoot?: string): IResolvedViewerScripts {
+    const result: IResolvedViewerScripts = { remote: [], local: [], invalid: [] };
+    for (const entry of scripts) {
+        const script = entry.trim();
+        if (/^[a-z][a-z0-9+.-]+:\/\//i.test(script)) {
+            let url: URL | undefined;
+            try {
+                url = new URL(script);
+            } catch {
+                url = undefined;
+            }
+            if (url?.protocol === 'https:') {
+                result.remote.push(url);
+            } else {
+                result.invalid.push(entry);
+            }
+        } else if (path.isAbsolute(script)) {
+            result.local.push(path.normalize(script));
+        } else if (script && workspaceRoot) {
+            result.local.push(path.resolve(workspaceRoot, script));
+        } else {
+            result.invalid.push(entry);
+        }
+    }
+    return result;
+}
+
+/**
+ * Resolves the `autodesk.forge.viewer.scripts` setting for the current workspace, dropping (and warning about)
+ * entries that are invalid or point to local files that don't exist, e.g. a relative path configured in the user
+ * settings that only exists in some projects.
+ */
+export async function loadViewerScripts(context: IContext, scripts: string[]): Promise<IResolvedViewerScripts> {
+    const resolved = resolveViewerScripts(scripts, vscode.workspace.workspaceFolders?.[0]?.uri.fsPath);
+    for (const invalid of resolved.invalid) {
+        context.log.warn(`Ignoring viewer script "${invalid}": only https:// URLs and local file paths are supported.`);
+    }
+    const exists = await Promise.all(resolved.local.map(file => Promise.resolve(vscode.workspace.fs.stat(vscode.Uri.file(file))).then(
+        stat => (stat.type & vscode.FileType.File) !== 0,
+        () => false
+    )));
+    const missing = resolved.local.filter((_, i) => !exists[i]);
+    if (missing.length > 0) {
+        for (const file of missing) {
+            context.log.warn(`Ignoring viewer script "${file}": the file does not exist.`);
+        }
+        vscode.window.showWarningMessage(vscode.l10n.t('Viewer script not found, skipping: {0}', missing.join(', ')));
+    }
+    return { ...resolved, local: resolved.local.filter((_, i) => exists[i]) };
+}
+
+function escapeHtml(text: string): string {
+    return text.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
+}
+
+export function createWebViewPanel<Props, Message = unknown>(context: IContext, scriptName: string, id: string, title: string, props: Props, onMessage?: (message: Message) => void, options?: { viewer?: boolean; panel?: vscode.WebviewPanel; viewerScripts?: IResolvedViewerScripts }): vscode.WebviewPanel {
     const viewer = !!options?.viewer;
     let disposables: vscode.Disposable[] = [];
+    // Additional user scripts (see `loadViewerScripts`) are only supported in the viewer webview.
+    const viewerScripts: IResolvedViewerScripts = (viewer && options?.viewerScripts) || { remote: [], local: [], invalid: [] };
     const webviewOptions: vscode.WebviewOptions & vscode.WebviewPanelOptions = {
         enableScripts: true, // Enable javascript in the webview
-        localResourceRoots: [vscode.Uri.joinPath(context.extensionContext.extensionUri, 'out')], // Restrict the webview to only load resources from the `out` directory
+        // Restrict the webview to only load resources from the `out` directory (and the folders of any local viewer scripts)
+        localResourceRoots: [
+            vscode.Uri.joinPath(context.extensionContext.extensionUri, 'out'),
+            ...[...new Set(viewerScripts.local.map(file => path.dirname(file)))].map(dir => vscode.Uri.file(dir))
+        ],
         retainContextWhenHidden: true
     };
     let panel = options?.panel ?? vscode.window.createWebviewPanel(id, title, vscode.ViewColumn.One, webviewOptions);
@@ -275,9 +352,14 @@ export function createWebViewPanel<Props, Message = unknown>(context: IContext, 
     if (viewer) {
         const viewerBase = `https://developer.api.autodesk.com/modelderivative/v2/viewers/${VIEWER_VERSION}`;
         const cspSource = panel.webview.cspSource;
+        const scriptOrigins = [...new Set(viewerScripts.remote.map(url => url.origin))].map(origin => ` ${origin}`).join('');
+        const scriptTags = [
+            ...viewerScripts.local.map(file => panel.webview.asWebviewUri(vscode.Uri.file(file)).toString()),
+            ...viewerScripts.remote.map(url => url.toString())
+        ].map(src => `\n            <script nonce="${nonce}" src="${escapeHtml(src)}"></script>`).join('');
         csp = [
             `default-src 'none'`,
-            `script-src 'nonce-${nonce}' ${cspSource} https://developer.api.autodesk.com 'unsafe-eval'`,
+            `script-src 'nonce-${nonce}' ${cspSource} https://developer.api.autodesk.com${scriptOrigins} 'unsafe-eval'`,
             `style-src ${cspSource} https://developer.api.autodesk.com 'unsafe-inline'`,
             `img-src ${cspSource} data: blob: https://*.api.autodesk.com`,
             `connect-src https://*.api.autodesk.com https://*.autodesk.com wss://*.autodesk.com data: blob:`,
@@ -288,7 +370,7 @@ export function createWebViewPanel<Props, Message = unknown>(context: IContext, 
         ].join('; ');
         headExtras = /*html*/ `
             <link rel="stylesheet" href="${viewerBase}/style.css">
-            <script nonce="${nonce}" src="${viewerBase}/viewer3D.js"></script>
+            <script nonce="${nonce}" src="${viewerBase}/viewer3D.js"></script>${scriptTags}
             <style>
                 body { margin: 0; }
                 #root { position: absolute; inset: 0; }
@@ -307,7 +389,7 @@ export function createWebViewPanel<Props, Message = unknown>(context: IContext, 
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width,initial-scale=1.0">
             <meta http-equiv="Content-Security-Policy" content="${csp}">${headExtras}
-            <title>${title.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!))}</title>
+            <title>${escapeHtml(title)}</title>
         </head>
         <body>
             <div id="root"></div>

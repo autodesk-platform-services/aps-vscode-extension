@@ -48,6 +48,7 @@ export async function activate(_context: vscode.ExtensionContext) {
         ...createServices(env),
 		previewSettings: {
 			extensions: vscode.workspace.getConfiguration(undefined, null).get<string[]>('autodesk.forge.viewer.extensions') || [],
+			scripts: vscode.workspace.getConfiguration(undefined, null).get<string[]>('autodesk.forge.viewer.scripts') || [],
 			env: vscode.workspace.getConfiguration(undefined, null).get<string>('autodesk.forge.viewer.env'),
 			api: vscode.workspace.getConfiguration(undefined, null).get<string>('autodesk.forge.viewer.api')
 		},
@@ -271,6 +272,7 @@ export async function activate(_context: vscode.ExtensionContext) {
 		const config = vscode.workspace.getConfiguration(undefined, null);
 		context.previewSettings = {
 			extensions: config.get<string[]>('autodesk.forge.viewer.extensions') || [],
+			scripts: config.get<string[]>('autodesk.forge.viewer.scripts') || [],
 			env: config.get<string>('autodesk.forge.viewer.env'),
 			api: config.get<string>('autodesk.forge.viewer.api')
 		};

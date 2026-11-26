@@ -1,4 +1,7 @@
 import * as assert from 'assert';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { ModelDerivativesCommands } from '../../commands/model-derivative';
 import { IContext } from '../../common';
@@ -34,10 +37,11 @@ describe('derivative preview restoration', () => {
 		return { panel, messages };
 	}
 
-	function createCommands() {
+	function createCommands(scripts: string[] = []) {
 		const context = {
 			extensionContext: { extensionUri: vscode.Uri.file('/extension') },
-			log: { error() {} }
+			previewSettings: { extensions: [], scripts },
+			log: { error() {}, warn() {} }
 		} as unknown as IContext;
 		return new ModelDerivativesCommands(context, () => {});
 	}
@@ -61,6 +65,39 @@ describe('derivative preview restoration', () => {
 		assert.deepStrictEqual(props.config.extensions, state.extensions);
 		assert.strictEqual(panel.webview.options.enableScripts, true);
 		assert.strictEqual(messages.length, 1);
+	});
+
+	let scriptsDir: string;
+	before(() => {
+		scriptsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aps-viewer-scripts-'));
+		fs.writeFileSync(path.join(scriptsDir, 'my-extension.js'), '// test');
+	});
+	after(() => fs.rmSync(scriptsDir, { recursive: true, force: true }));
+
+	it('injects the configured viewer scripts and allows their origins', async () => {
+		const { panel } = createPanel();
+		const local = vscode.Uri.file(path.join(scriptsDir, 'my-extension.js'));
+		await createCommands([local.fsPath, 'https://cdn.example.com/lib/ext.js', 'http://insecure.example.com/ext.js'])
+			.restoreDerivativePreview(panel as unknown as vscode.WebviewPanel, state, async () => 'token');
+		const html = panel.webview.html;
+		assert.ok(html.includes(`src="${local.toString()}"`));
+		assert.ok(html.includes('src="https://cdn.example.com/lib/ext.js"'));
+		assert.ok(!html.includes('insecure.example.com'));
+		assert.match(html, /script-src [^;]*https:\/\/cdn\.example\.com[ ;']/);
+		assert.ok(html.indexOf('viewer3D.js') < html.indexOf('my-extension.js'));
+		const roots = (panel.webview.options.localResourceRoots ?? []).map(uri => uri.fsPath);
+		assert.ok(roots.includes(vscode.Uri.file(scriptsDir).fsPath));
+	});
+
+	it('skips local viewer scripts that do not exist', async () => {
+		const { panel } = createPanel();
+		const missing = path.join(scriptsDir, 'missing', 'gone.js');
+		await createCommands([missing]).restoreDerivativePreview(panel as unknown as vscode.WebviewPanel, state, async () => 'token');
+		const html = panel.webview.html;
+		assert.ok(html.includes('viewer3D.js'));
+		assert.ok(!html.includes('gone.js'));
+		const roots = (panel.webview.options.localResourceRoots ?? []).map(uri => uri.fsPath);
+		assert.ok(!roots.includes(vscode.Uri.file(path.dirname(missing)).fsPath));
 	});
 
 	it('reports invalid state without requesting a token', async () => {

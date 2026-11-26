@@ -98,6 +98,14 @@
                         "type": "string"
                     }
                 },
+                "autodesk.forge.viewer.scripts": {
+                    "scope": "resource",
+                    "type": "array",
+                    "description": "%configuration.viewer.scripts.description%",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "autodesk.forge.viewer.env": {
                     "scope": "resource",
                     "type": "string",

@@ -164,6 +164,7 @@
     "configuration.environments.designAutomationRegion.description": "APS Design Automation availability region",
     "configuration.environments.designAutomationEndpoint.description": "Full Design Automation API base URL (including region and API version); overrides designAutomationRegion for Design Automation calls only",
     "configuration.viewer.extensions.description": "Viewer extensions to be used when previewing derivatives.",
+    "configuration.viewer.scripts.description": "Additional JavaScript files (https:// URLs, or file paths absolute or relative to the first workspace folder) loaded into the viewer before it starts, for example to register custom viewer extensions. Only add scripts you trust: they run with access to the viewer's access token.",
     "configuration.viewer.env.description": "Custom Model Derivative environment used by the APS Viewer. By default, the viewer will determine the appropriate environment based on the viewable output format (SVF vs SVF2).",
     "configuration.viewer.api.description": "Custom Model Derivative API used by the APS Viewer. By default, the viewer will determine the appropriate API based on the viewable output format (SVF vs SVF2).",
     "configuration.data.defaultContentType.description": "When defined, all uploaded files and empty objects created in OSS will use this content type.",

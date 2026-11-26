@@ -46,5 +46,6 @@
   "No private key file selected.": "秘密キーファイルが選択されていません。",
   "Select scopes": "スコープを選択",
   "No scopes selected.": "スコープが選択されていません。",
-  "Generating access token...": "アクセストークンを生成しています..."
+  "Generating access token...": "アクセストークンを生成しています...",
+  "Viewer script not found, skipping: {0}": "ビューアスクリプトが見つからないため、スキップします: {0}"
 }
