@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.10.0] - 2026-11-26
+
 - Added
   - Custom Design Automation endpoints and regions per environment
   - `autodesk.forge.viewer.scripts` setting for loading custom JavaScript (for example, custom viewer extensions) into the viewer
