@@ -10,4 +10,5 @@ export interface IEnvironment {
     region?: string;
     host?: string;
     designAutomationRegion?: string;
+    designAutomationEndpoint?: string;
 }

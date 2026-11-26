@@ -81,11 +81,11 @@
                             "designAutomationRegion": {
                                 "type": "string",
                                 "description": "%configuration.environments.designAutomationRegion.description%",
-                                "enum": [
-                                    "us-west",
-                                    "us-east"
-                                ],
                                 "default": "us-east"
+                            },
+                            "designAutomationEndpoint": {
+                                "type": "string",
+                                "description": "%configuration.environments.designAutomationEndpoint.description%"
                             }
                         }
                     }
