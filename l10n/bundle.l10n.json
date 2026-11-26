@@ -46,5 +46,6 @@
   "No private key file selected.": "No private key file selected.",
   "Select scopes": "Select scopes",
   "No scopes selected.": "No scopes selected.",
-  "Generating access token...": "Generating access token..."
+  "Generating access token...": "Generating access token...",
+  "Viewer script not found, skipping: {0}": "Viewer script not found, skipping: {0}"
 }

@@ -219,15 +219,22 @@ export class ModelDerivativeService {
         return this.clientForObject(object).getManifest(this.getObjectUrn(object), this.regionArg);
     }
 
-    /** Downloads the 100x100, 200x200 and 400x400 thumbnails of a tree object, as binary strings. */
-    getObjectThumbnails(object: ObjectDetails | IVersion): Promise<[string, string, string]> {
+    /** Downloads the 100x100, 200x200 and 400x400 thumbnails of a tree object, as PNG bytes. */
+    getObjectThumbnails(object: ObjectDetails | IVersion): Promise<[Buffer, Buffer, Buffer]> {
         const client = this.clientForObject(object);
         const urn = this.getObjectUrn(object);
-        return Promise.all([
-            client.getThumbnail(urn, { width: 100, height: 100, ...this.regionArg }),
-            client.getThumbnail(urn, { width: 200, height: 200, ...this.regionArg }),
-            client.getThumbnail(urn, { width: 400, height: 400, ...this.regionArg })
-        ]);
+        // The SDK types the response as `string`, but without `responseType: 'arraybuffer'` axios decodes the
+        // PNG as UTF-8 text and corrupts it, so request raw bytes and wrap them in a Buffer.
+        const download = async (size: 100 | 200 | 400): Promise<Buffer> => {
+            const data: unknown = await client.getThumbnail(urn, {
+                width: size,
+                height: size,
+                options: { responseType: 'arraybuffer' },
+                ...this.regionArg
+            });
+            return Buffer.from(data as ArrayBuffer);
+        };
+        return Promise.all([download(100), download(200), download(400)]);
     }
 
     /** Fetches the manifest of an already-encoded URN (OSS objects use the app client). */

@@ -163,6 +163,7 @@
     "configuration.environments.region.description": "APS elérhetőségi régió",
     "configuration.environments.designAutomationRegion.description": "APS Design Automation elérhetőségi régió",
     "configuration.viewer.extensions.description": "A derivatívumok előnézetekor használt Viewer-bővítmények.",
+    "configuration.viewer.scripts.description": "További JavaScript-fájlok (https:// URL-ek, vagy abszolút, illetve az első munkaterület-mappához viszonyított fájlútvonalak), amelyek a Viewer indítása előtt töltődnek be, például egyéni Viewer-bővítmények regisztrálásához. Csak megbízható szkripteket adjon meg: ezek hozzáférnek a Viewer hozzáférési tokenjéhez.",
     "configuration.viewer.env.description": "Az APS Viewer által használt egyéni Model Derivative környezet. Alapértelmezés szerint a Viewer a megjeleníthető kimeneti formátum (SVF vagy SVF2) alapján határozza meg a megfelelő környezetet.",
     "configuration.viewer.api.description": "Az APS Viewer által használt egyéni Model Derivative API. Alapértelmezés szerint a Viewer a megjeleníthető kimeneti formátum (SVF vagy SVF2) alapján határozza meg a megfelelő API-t.",
     "configuration.data.defaultContentType.description": "Ha meg van adva, az OSS-be feltöltött összes fájl és létrehozott üres objektum ezt a tartalomtípust használja.",

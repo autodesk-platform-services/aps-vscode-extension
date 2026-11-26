@@ -3,7 +3,7 @@ import * as path from 'path';
 import { ObjectDetails } from '../models/oss';
 import { ObjectTree, Properties, IDerivative, svf2 } from '../models/model-derivative';
 import { IContext, command, promptBucket, promptCustomDerivative, promptDerivative, promptObject, showErrorMessage } from '../common';
-import { withProgress, createWebViewPanel, showReadOnlyJson } from '../common';
+import { withProgress, createWebViewPanel, loadViewerScripts, showReadOnlyJson } from '../common';
 import type { IDerivativePreviewProps, IDerivativePreviewMessage, IDerivativePreviewState } from '../webviews/derivative-preview';
 import type { IThumbnailsProps, IThumbnailsMessage } from '../webviews/thumbnails';
 import type { ICustomDerivativeMessage, ICustomDerivativeProps } from '../webviews/custom-translation';
@@ -152,13 +152,14 @@ export class ModelDerivativesCommands {
 				extensions: this.context.previewSettings.extensions
 			};
 			const accessToken = await withProgress('Retrieving viewer access token', service.getViewerAccessToken(derivative.urn));
-			this.showDerivativePreview(`Preview: ${derivative.name}`, state, accessToken);
+			await this.showDerivativePreview(`Preview: ${derivative.name}`, state, accessToken);
 		} catch (err) {
 			showErrorMessage(`Could not access object`, err, this.context);
 		}
 	}
 
-	showDerivativePreview(title: string, state: IDerivativePreviewState, token: string, panel?: vscode.WebviewPanel) {
+	async showDerivativePreview(title: string, state: IDerivativePreviewState, token: string, panel?: vscode.WebviewPanel) {
+		const viewerScripts = await loadViewerScripts(this.context, this.context.previewSettings.scripts);
 		createWebViewPanel<IDerivativePreviewProps, IDerivativePreviewMessage>(this.context, 'derivative-preview.js', 'derivative-preview', title, {
 			api: state.api, env: state.env, token, urn: state.urn, guid: state.guid,
 			config: { extensions: state.extensions }, state
@@ -168,7 +169,7 @@ export class ModelDerivativesCommands {
 						showErrorMessage(`Could not load viewable`, message.error, this.context);
 						break;
 				}
-		}, { viewer: true, panel });
+		}, { viewer: true, panel, viewerScripts });
 	}
 
 	async restoreDerivativePreview(panel: vscode.WebviewPanel, state: unknown, getToken: (state: IDerivativePreviewState) => Promise<string>) {
@@ -185,7 +186,7 @@ export class ModelDerivativesCommands {
 				urn: state.urn, guid: state.guid, api: state.api, env: state.env, extensions: state.extensions
 			};
 			const token = await getToken(safeState);
-			this.showDerivativePreview(panel.title, safeState, token, panel);
+			await this.showDerivativePreview(panel.title, safeState, token, panel);
 		} catch (err) {
 			panel.webview.html = '<!DOCTYPE html><html><body>Could not restore the viewer. Please reopen it from the tree view.</body></html>';
 			showErrorMessage('Could not restore viewer', err, this.context);
@@ -327,12 +328,12 @@ export class ModelDerivativesCommands {
 	}
 
 	async viewObjectThumbnail(object?: ObjectDetails | IVersion) {
-		const downloadThumbnail = async (png: string, defaultUri: vscode.Uri) => {
+		const downloadThumbnail = async (png: Uint8Array, defaultUri: vscode.Uri) => {
 			const uri = await vscode.window.showSaveDialog({ defaultUri });
 			if (!uri) {
 				return;
 			}
-			await this.context.modelDerivativeService.saveToFile(uri.fsPath, Buffer.from(png, 'binary'));
+			await this.context.modelDerivativeService.saveToFile(uri.fsPath, png);
 			vscode.window.showInformationMessage(`Thumbnail downloaded: ${uri.fsPath}`);
 		};
 
@@ -360,7 +361,7 @@ export class ModelDerivativesCommands {
 				await this.context.modelDerivativeService.getObjectManifest(thumbnailObject); // Check if the manifest exists
 				return await this.context.modelDerivativeService.getObjectThumbnails(thumbnailObject);
 			});
-			const pngToDataURI = (img: string) => 'data:image/png;base64,' + Buffer.from(img, 'binary').toString('base64');
+			const pngToDataURI = (img: Buffer) => 'data:image/png;base64,' + img.toString('base64');
 			createWebViewPanel<IThumbnailsProps, IThumbnailsMessage>(this.context, 'thumbnails.js', 'thumbnails', `Thumbnails: ${key}`, {
 				objectKey: key,
 				smallDataURI: pngToDataURI(thumbnails[0]),

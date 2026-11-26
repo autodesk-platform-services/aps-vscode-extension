@@ -6,7 +6,7 @@
     "description": "%extension.description%",
     "author": "Petr Broz <petr.broz@autodesk.com>",
     "license": "MIT",
-    "version": "3.9.0",
+    "version": "3.10.0",
     "homepage": "https://marketplace.visualstudio.com/items?itemName=petrbroz.vscode-forge-tools",
     "repository": {
         "type": "git",
@@ -81,11 +81,11 @@
                             "designAutomationRegion": {
                                 "type": "string",
                                 "description": "%configuration.environments.designAutomationRegion.description%",
-                                "enum": [
-                                    "us-west",
-                                    "us-east"
-                                ],
                                 "default": "us-east"
+                            },
+                            "designAutomationEndpoint": {
+                                "type": "string",
+                                "description": "%configuration.environments.designAutomationEndpoint.description%"
                             }
                         }
                     }
@@ -94,6 +94,14 @@
                     "scope": "resource",
                     "type": "array",
                     "description": "%configuration.viewer.extensions.description%",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "autodesk.forge.viewer.scripts": {
+                    "scope": "resource",
+                    "type": "array",
+                    "description": "%configuration.viewer.scripts.description%",
                     "items": {
                         "type": "string"
                     }

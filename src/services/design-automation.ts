@@ -70,8 +70,9 @@ export class DesignAutomationService {
     private readonly rest: RestClient;
     private _nickname: Promise<string> | null = null;
 
-    constructor(authenticationProvider: IAuthenticationProvider, host?: string, region?: DesignAutomationRegion) {
-        this.rest = new RestClient(`${host || DEFAULT_HOST}/da/${region || DesignAutomationRegion.US_EAST}/v3`, authenticationProvider, DESIGN_AUTOMATION_SCOPES);
+    constructor(authenticationProvider: IAuthenticationProvider, host?: string, region?: string, endpoint?: string) {
+        const baseUrl = endpoint || `${(host || DEFAULT_HOST).replace(/\/+$/, '')}/da/${region || DesignAutomationRegion.US_EAST}/v3`;
+        this.rest = new RestClient(baseUrl.replace(/\/+$/, ''), authenticationProvider, DESIGN_AUTOMATION_SCOPES);
     }
 
     private listAll<T>(path: string): Promise<T[]> {

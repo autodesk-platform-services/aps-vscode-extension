@@ -46,5 +46,6 @@
   "No private key file selected.": "Nincs privátkulcs-fájl kiválasztva.",
   "Select scopes": "Válasszon hatóköröket",
   "No scopes selected.": "Nincs hatókör kiválasztva.",
-  "Generating access token...": "Hozzáférési token generálása..."
+  "Generating access token...": "Hozzáférési token generálása...",
+  "Viewer script not found, skipping: {0}": "A Viewer-szkript nem található, kihagyva: {0}"
 }
