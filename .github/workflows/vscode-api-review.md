@@ -49,8 +49,9 @@ run and review only the **last 3 stable releases**.
 ## Step 2: Find new VS Code releases and API changes
 
 1. Use the GitHub `list_releases` tool on `microsoft/vscode` to determine the latest stable release.
-   Exclude prereleases and group patch releases by minor version. On a first run, select the last
-   3 distinct stable minor releases.
+   Exclude prereleases and group patch releases by minor version. Paginate as needed to find every
+   minor release since `lastVersionReviewed`. On a first run, select the last 3 distinct stable
+   minor releases.
 2. For each stable minor release newer than `lastVersionReviewed`, use the GitHub `get_file_contents`
    tool to read `release-notes/v1_<minor>.md` from `microsoft/vscode-docs` (default branch).
    These are the source files for `https://code.visualstudio.com/updates/v1_<minor>`. Read the
