@@ -147,6 +147,13 @@ export interface IUploadObjectOptions {
     signal?: AbortSignal;
 }
 
+export interface IDeleteObjectsResult {
+    /** Number of objects that were deleted successfully. */
+    deleted: number;
+    /** Number of objects whose deletion failed. */
+    failed: number;
+}
+
 export interface IDeleteObjectsOptions {
     /** Called after each batch completes with the progress increment (0-100) contributed by that batch. */
     onProgress?: (increment: number) => void;
@@ -350,20 +357,28 @@ export class OssService {
         await this.client.deleteObject(bucketKey, objectKey);
     }
 
-    /** Deletes many objects in parallel batches, with optional progress reporting and cancellation. */
-    async deleteObjects(bucketKey: string, objectKeys: string[], options?: IDeleteObjectsOptions): Promise<void> {
-        let batch: Promise<unknown>[] = [];
-        for (let i = 0, len = objectKeys.length; i < len; i++) {
+    /**
+     * Deletes many objects in parallel batches, with optional progress reporting and cancellation.
+     * Failures of individual objects do not stop the remaining deletions; they are counted in the result.
+     */
+    async deleteObjects(bucketKey: string, objectKeys: string[], options?: IDeleteObjectsOptions): Promise<IDeleteObjectsResult> {
+        const result: IDeleteObjectsResult = { deleted: 0, failed: 0 };
+        for (let i = 0, len = objectKeys.length; i < len; i += DeleteBatchSize) {
             if (options?.isCancelled?.()) {
                 break;
             }
-            batch.push(this.client.deleteObject(bucketKey, objectKeys[i]));
-            if (batch.length === DeleteBatchSize || i === len - 1) {
-                await Promise.all(batch);
-                options?.onProgress?.(100.0 * batch.length / len);
-                batch = [];
+            const batch = objectKeys.slice(i, i + DeleteBatchSize);
+            const outcomes = await Promise.allSettled(batch.map(key => this.client.deleteObject(bucketKey, key)));
+            for (const outcome of outcomes) {
+                if (outcome.status === 'fulfilled') {
+                    result.deleted++;
+                } else {
+                    result.failed++;
+                }
             }
+            options?.onProgress?.(100.0 * batch.length / len);
         }
+        return result;
     }
 
     createSignedUrl(bucketKey: string, objectKey: string, access: SignedUrlAccess): Promise<CreateObjectSigned> {

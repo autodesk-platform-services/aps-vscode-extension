@@ -136,7 +136,7 @@ export class ObjectStorageServiceCommands {
                 return;
             }
 
-            await vscode.window.withProgress({
+            const { failed } = await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: `Deleting all objects in bucket: ${bucket.bucketKey}`,
                 cancellable: true
@@ -146,12 +146,16 @@ export class ObjectStorageServiceCommands {
                     cancelled = true;
                 });
                 progress.report({ increment: 0 });
-                await this.context.ossService.deleteObjects(bucketKey, objects.map(object => object.objectKey!), {
+                return this.context.ossService.deleteObjects(bucketKey, objects.map(object => object.objectKey!), {
                     onProgress: (increment) => progress.report({ increment }),
                     isCancelled: () => cancelled
                 });
             });
-            vscode.window.showInformationMessage(`Objects deleted`);
+            if (failed > 0) {
+                vscode.window.showErrorMessage(`Could not delete ${failed} ${failed === 1 ? 'object' : 'objects'}`);
+            } else {
+                vscode.window.showInformationMessage(`Objects deleted`);
+            }
         } catch(err) {
             showErrorMessage('Could not delete objects', err, this.context);
         }
@@ -404,31 +408,93 @@ export class ObjectStorageServiceCommands {
         }
     }
 
-    async deleteObject(object?: ObjectDetails) {
+    async deleteObject(object?: ObjectDetails, selection?: unknown[]) {
         try {
-            if (!object) {
-                const bucket = await promptBucket(this.context);
-                if (!bucket) {
-                    return;
-                }
-                object = await promptObject(this.context, bucket.bucketKey);
-                if (!object) {
-                    return;
-                }
+            // When invoked from a tree view, VS Code passes the clicked item and all selected items.
+            const selectedObjects = (Array.isArray(selection) ? selection : [])
+                .filter((item): item is ObjectDetails => !!item && typeof item === 'object' && 'objectId' in item && !!(item as ObjectDetails).bucketKey && !!(item as ObjectDetails).objectKey);
+            if (selectedObjects.length > 1) {
+                await this.deleteSelectedObjects(selectedObjects);
+            } else if (Array.isArray(selection) && selection.length > 0 && selectedObjects.length === 0) {
+                return; // The selection contains no objects.
+            } else {
+                await this.deleteSingleObject(selectedObjects[0] ?? object);
             }
-
-            const confirm = await vscode.window.showWarningMessage(`Are you sure you want to delete object: ${object.objectKey}? This action cannot be undone.`, { modal: true }, 'Delete');
-            if (confirm !== 'Delete') {
-                return;
-            }
-
-            const bucketKey = object.bucketKey!, objectKey = object.objectKey!;
-            await withProgress(`Deleting object: ${object.objectKey}`, this.context.ossService.deleteObject(bucketKey, objectKey));
-            vscode.window.showInformationMessage(`Object deleted: ${object.objectKey}`);
         } catch(err) {
             showErrorMessage('Could not delete object', err, this.context);
         }
         this.refresh();
+    }
+
+    protected async deleteSingleObject(object?: ObjectDetails) {
+        if (!object) {
+            const bucket = await promptBucket(this.context);
+            if (!bucket) {
+                return;
+            }
+            object = await promptObject(this.context, bucket.bucketKey);
+            if (!object) {
+                return;
+            }
+        }
+
+        const confirm = await vscode.window.showWarningMessage(`Are you sure you want to delete object: ${object.objectKey}? This action cannot be undone.`, { modal: true }, 'Delete');
+        if (confirm !== 'Delete') {
+            return;
+        }
+
+        const bucketKey = object.bucketKey!, objectKey = object.objectKey!;
+        await withProgress(`Deleting object: ${object.objectKey}`, this.context.ossService.deleteObject(bucketKey, objectKey));
+        vscode.window.showInformationMessage(`Object deleted: ${object.objectKey}`);
+    }
+
+    protected async deleteSelectedObjects(objects: ObjectDetails[]) {
+        const confirm = await vscode.window.showWarningMessage(`Are you sure you want to delete ${objects.length} objects? This action cannot be undone.`, { modal: true }, 'Delete');
+        if (confirm !== 'Delete') {
+            return;
+        }
+
+        const keysByBucket = new Map<string, string[]>();
+        for (const object of objects) {
+            const keys = keysByBucket.get(object.bucketKey!) ?? [];
+            keys.push(object.objectKey!);
+            keysByBucket.set(object.bucketKey!, keys);
+        }
+
+        const total = objects.length;
+        let cancelled = false;
+        const result = await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: `Deleting ${total} objects`,
+            cancellable: true
+        }, async (progress, token) => {
+            token.onCancellationRequested(() => {
+                cancelled = true;
+            });
+            progress.report({ increment: 0 });
+            let deleted = 0, failed = 0;
+            for (const [bucketKey, objectKeys] of keysByBucket) {
+                if (cancelled) {
+                    break;
+                }
+                const share = objectKeys.length / total;
+                const bucketResult = await this.context.ossService.deleteObjects(bucketKey, objectKeys, {
+                    onProgress: (increment) => progress.report({ increment: increment * share }),
+                    isCancelled: () => cancelled
+                });
+                deleted += bucketResult.deleted;
+                failed += bucketResult.failed;
+            }
+            return { deleted, failed };
+        });
+        const deletedText = `${result.deleted} of ${total} objects deleted`;
+        if (result.failed > 0) {
+            vscode.window.showErrorMessage(`Could not delete ${result.failed} ${result.failed === 1 ? 'object' : 'objects'} (${deletedText})`);
+        } else if (cancelled) {
+            vscode.window.showInformationMessage(`Cancelled: ${deletedText}`);
+        } else {
+            vscode.window.showInformationMessage(`${result.deleted} objects deleted`);
+        }
     }
 
     async generateSignedUrl(object?: ObjectDetails) {

@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- Added
+  - Multiple objects can be selected in the Data Management view and deleted at once with "Delete Object"
 - Fixed
   - Deleting a Model Derivative manifest no longer reports success when the request fails, and shows "No derivatives to delete" instead of offering a translation when the object has no manifest
   - Cancelling a step of the sign-in flow no longer shows a "Could not log in" warning
