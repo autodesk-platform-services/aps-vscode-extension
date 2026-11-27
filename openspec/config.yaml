@@ -32,11 +32,17 @@ context: |
 
 rules:
   specs:
-    - Describe current behavior as requirements using SHALL/MUST, each with at least one WHEN/THEN scenario.
-    - Cover cancellation, empty results, and error paths, not only the happy path.
-    - Reference settings by their exact key (for example `autodesk.forge.data.pageSize`).
+    - Describe current behavior as requirements using SHALL/MUST, each with at
+      least one WHEN/THEN scenario.
+    - Cover cancellation, empty results, and error paths, not only the happy
+      path.
+    - Reference settings by their exact key (for example
+      `autodesk.forge.data.pageSize`).
     - Reference commands by their exact ID (for example `aps.oss.uploadObject`).
   tasks:
-    - Include a task to mirror any command or tool change in package.json contributes.
+    - Include a task to mirror any command or tool change in package.json
+      contributes.
     - Include a task to add a CHANGELOG.md entry for user-facing changes.
     - Include a task to run `yarn typecheck` and `yarn test`.
+githubCopilot:
+  cloudAgent: true
