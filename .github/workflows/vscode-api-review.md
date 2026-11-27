@@ -48,11 +48,17 @@ run and review only the **last 3 stable releases**.
 
 ## Step 2: Find new VS Code releases and API changes
 
-1. Determine the latest stable VS Code release from https://code.visualstudio.com/updates.
-2. For each stable release newer than `lastVersionReviewed`, fetch its release notes
-   (`https://code.visualstudio.com/updates/v1_<minor>`) and read the **Extension authoring** section
-   and any sections on chat, language model tools, MCP, authentication, webviews, tree views,
-   and the Command Palette/Quick Pick that affect extensions.
+1. Use the GitHub `list_releases` tool on `microsoft/vscode` to determine the latest stable release.
+   Exclude prereleases and group patch releases by minor version. Paginate as needed to find every
+   minor release since `lastVersionReviewed`. On a first run, select the last 3 distinct stable
+   minor releases.
+2. For each stable minor release newer than `lastVersionReviewed`, use the GitHub `get_file_contents`
+   tool to read `release-notes/v1_<minor>.md` from `microsoft/vscode-docs` (default branch).
+   These are the source files for `https://code.visualstudio.com/updates/v1_<minor>`. Read the
+   **Extension authoring** section and any sections on chat, language model tools, MCP,
+   authentication, webviews, tree views, and the Command Palette/Quick Pick that affect extensions.
+   If a required release note is unavailable, report the review as incomplete rather than advancing
+   the saved version.
 3. Cross-check against the proposed/finalized API surface in `vscode.d.ts` from the
    `microsoft/vscode` repository (`src/vscode-dts/vscode.d.ts` at the release tag) when the release
    notes are vague.
