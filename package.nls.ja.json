@@ -167,7 +167,6 @@
     "configuration.viewer.env.description": "APS Viewer が使用するカスタム Model Derivative 環境。既定では、ビューアブルの出力形式 (SVF または SVF2) に基づいて適切な環境が自動的に選択されます。",
     "configuration.viewer.api.description": "APS Viewer が使用するカスタム Model Derivative API。既定では、ビューアブルの出力形式 (SVF または SVF2) に基づいて適切な API が自動的に選択されます。",
     "configuration.data.defaultContentType.description": "定義されている場合、OSS にアップロードされるすべてのファイルと作成される空のオブジェクトにこのコンテンツタイプが使用されます。",
-    "configuration.data.uploadChunkSize.description": "再開可能なアップロード機能で OSS にファイルをアップロードする際の、各チャンクのサイズ (バイト単位)。",
     "configuration.data.pageSize.description": "「データとデリバティブ (アプリ)」ツリービューで、「さらに読み込む」項目を表示するまでに 1 ページあたり取得するバケット/オブジェクトの数。",
     "configuration.data.hubsPageSize.description": "「データとデリバティブ (ユーザー)」ツリービューで、「さらに読み込む」項目を表示するまでに 1 ページあたり取得するプロジェクト/フォルダーアイテム/バージョンの数。",
     "configuration.enableTeamAdminApi.description": "Team Admin API (ベータ) 用の「チーム管理 (ユーザー)」ビューを有効にします。有効にすると、3-legged OAuth でのサインイン時に追加のスコープ (tmadmapi:team:read、tmadmapi:team-users:write、tmadmapi:team-products:write) が要求されるため、APS アプリで Team Admin API を有効にしておく必要があります。この設定を変更した後は、再度サインインしてください。",

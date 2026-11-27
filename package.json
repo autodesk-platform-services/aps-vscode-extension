@@ -122,12 +122,6 @@
                     "default": "application/octet-stream",
                     "description": "%configuration.data.defaultContentType.description%"
                 },
-                "autodesk.forge.data.uploadChunkSize": {
-                    "scope": "resource",
-                    "type": "number",
-                    "default": 2097152,
-                    "description": "%configuration.data.uploadChunkSize.description%"
-                },
                 "autodesk.forge.data.pageSize": {
                     "scope": "resource",
                     "type": "number",
@@ -1025,6 +1019,50 @@
                 },
                 {
                     "command": "aps.teamAdmin.unassignProduct",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.da.viewAppBundleAliasDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.da.viewActivityAliasDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.viewHubDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.viewUserDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.copyUserID",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.viewProjectDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.copyProjectID",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.viewProjectUserDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.copyProjectUserID",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.viewCompanyDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.copyCompanyID",
                     "when": "false"
                 },
                 {

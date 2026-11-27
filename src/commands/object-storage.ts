@@ -302,7 +302,7 @@ export class ObjectStorageServiceCommands {
         }
 
         try {
-            const objectId = await withProgress(`Creating object: ${name}`, this.context.ossService.createEmptyObject(bucketKey, name));
+            const objectId = await withProgress(`Creating object: ${name}`, this.context.ossService.createEmptyObject(bucketKey, name, contentType));
             vscode.window.showInformationMessage(`Object created: ${objectId}`);
         } catch(err) {
             showErrorMessage('Could not create file', err, this.context);

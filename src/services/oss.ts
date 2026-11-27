@@ -301,11 +301,15 @@ export class OssService {
 
     /**
      * Creates an empty object by requesting a write-access signed URL and uploading a zero-byte body
-     * to it. Returns the new object's ID.
+     * to it, recording the given content type (if any) with the object. Returns the new object's ID.
      */
-    async createEmptyObject(bucketKey: string, objectKey: string): Promise<string> {
+    async createEmptyObject(bucketKey: string, objectKey: string, contentType?: string): Promise<string> {
         const signedUrl = await this.client.createSignedResource(bucketKey, objectKey, { access: Access.Write });
-        const response = await fetch(signedUrl.signedUrl, { method: 'PUT', body: new Uint8Array(0) });
+        const response = await fetch(signedUrl.signedUrl, {
+            method: 'PUT',
+            headers: contentType ? { 'Content-Type': contentType } : undefined,
+            body: new Uint8Array(0)
+        });
         if (!response.ok) {
             throw new Error(`Request failed with status code ${response.status}`);
         }

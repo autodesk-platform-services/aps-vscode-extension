@@ -1,0 +1,42 @@
+schema: spec-driven
+
+context: |
+  VS Code extension (published as "Autodesk Platform Services", extension ID
+  petrbroz.vscode-forge-tools) that surfaces APS services as tree views, commands,
+  and React webview panels. TypeScript, bundled with esbuild. See CLAUDE.md for
+  build commands and the full architecture description.
+
+  Specs describe user-observable behavior: commands, views, settings, prompts,
+  confirmations, notifications, and results. Do not specify file layout, class
+  names, or SDK calls unless they are observable. Capabilities map to APS service
+  domains (object-storage, model-derivative, design-automation, webhooks, and so on).
+
+  Architecture constraints that every design and task list must respect:
+  - Layers depend one way only: commands/providers/tools -> services + models;
+    services -> models; webviews -> models.
+  - src/services/** and src/models/** must never import 'vscode'. Only src/services/**
+    may import @aps_sdk/* or use fetch/fs. Other layers get SDK types re-exported
+    from src/models/*.
+  - Services are constructed only in createServices() (src/services/index.ts).
+    Environment switching and sign-in/out rebuild services and Object.assign them
+    onto the shared context; never construct a service or SDK client ad hoc.
+  - New services use official @aps_sdk/* packages; if none exists, use the
+    fetch-based RestClient. No axios or fs-extra.
+  - Commands and package.json contributes (commands, menus, languageModelTools)
+    are hand-synced. Every command/tool change must update both sides in the same
+    change, with matching IDs, titles, and menu placements. Do not add codegen.
+  - Every user-facing change adds a short entry under [Unreleased] in CHANGELOG.md.
+  - Verify with `yarn typecheck`, `yarn build`, and `yarn test`. There is no
+    lint or format step.
+  - Write user-facing text (titles, labels, messages) in sentence case.
+
+rules:
+  specs:
+    - Describe current behavior as requirements using SHALL/MUST, each with at least one WHEN/THEN scenario.
+    - Cover cancellation, empty results, and error paths, not only the happy path.
+    - Reference settings by their exact key (for example `autodesk.forge.data.pageSize`).
+    - Reference commands by their exact ID (for example `aps.oss.uploadObject`).
+  tasks:
+    - Include a task to mirror any command or tool change in package.json contributes.
+    - Include a task to add a CHANGELOG.md entry for user-facing changes.
+    - Include a task to run `yarn typecheck` and `yarn test`.

@@ -238,6 +238,38 @@ describe('OssService', () => {
 			assert.strictEqual((putRequest?.init.body as Uint8Array).length, 0);
 		});
 
+		it('records the given content type on the upload request', async () => {
+			let putInit: RequestInit | undefined;
+			global.fetch = (async (_url: string, init: RequestInit) => {
+				putInit = init;
+				return { ok: true, json: async () => ({ objectId: 'my-bucket/empty.txt' }) };
+			}) as any;
+			const fakeClient = {
+				createSignedResource: async () => ({ signedUrl: 'https://signed.example/upload' })
+			};
+
+			const service = new OssService(fakeClient as any);
+			await service.createEmptyObject('my-bucket', 'empty.txt', 'text/plain');
+
+			assert.deepStrictEqual(putInit?.headers, { 'Content-Type': 'text/plain' });
+		});
+
+		it('sends no Content-Type header when no content type is given', async () => {
+			let putInit: RequestInit | undefined;
+			global.fetch = (async (_url: string, init: RequestInit) => {
+				putInit = init;
+				return { ok: true, json: async () => ({ objectId: 'my-bucket/empty.txt' }) };
+			}) as any;
+			const fakeClient = {
+				createSignedResource: async () => ({ signedUrl: 'https://signed.example/upload' })
+			};
+
+			const service = new OssService(fakeClient as any);
+			await service.createEmptyObject('my-bucket', 'empty.txt');
+
+			assert.strictEqual(putInit?.headers, undefined);
+		});
+
 		it('throws when the upload response is not ok', async () => {
 			global.fetch = (async () => ({ ok: false, status: 500 })) as any;
 			const fakeClient = {

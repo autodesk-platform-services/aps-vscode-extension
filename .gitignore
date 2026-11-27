@@ -6,5 +6,6 @@ node_modules
 .DS_Store
 .wip
 specs/
+!openspec/specs
 *.local.json
 *.local.md
