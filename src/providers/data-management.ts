@@ -150,7 +150,7 @@ export class SimpleStorageDataProvider extends BaseTreeProvider<SimpleStorageEnt
 
     /** Reads `autodesk.forge.data.pageSize` and clamps it to the API's accepted 1-100 range. */
     private _pageSize(): number {
-        const configured = vscode.workspace.getConfiguration(undefined, null).get<number>('autodesk.forge.data.pageSize', 100);
+        const configured = vscode.workspace.getConfiguration(undefined, null).get<number>('autodesk.forge.data.pageSize', 32);
         return Math.min(100, Math.max(1, configured));
     }
 

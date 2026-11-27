@@ -88,7 +88,7 @@ export class HubsDataProvider extends BaseTreeProvider<HubsEntry> {
 
     /** Reads `autodesk.forge.data.hubsPageSize` and clamps it to the Data Management API's accepted 1-200 range. */
     private _pageSize(): number {
-        const configured = vscode.workspace.getConfiguration(undefined, null).get<number>('autodesk.forge.data.hubsPageSize', 200);
+        const configured = vscode.workspace.getConfiguration(undefined, null).get<number>('autodesk.forge.data.hubsPageSize', 32);
         return Math.min(200, Math.max(1, configured));
     }
 

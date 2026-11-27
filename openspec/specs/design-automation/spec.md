@@ -142,7 +142,7 @@ Commands that act on a tree node SHALL require one. Invoking such a command with
 
 ### Requirement: App bundle aliases
 
-`aps.da.createAppBundleAlias` (offered on an "Aliases" node of an app bundle) SHALL prompt for the alias name ("Enter alias name"), then a version ("Select app bundle version") from the bundle's versions, then an optional receiver ID ("Enter receiver ID (optional)"), and create the alias; on success "App bundle alias created" is shown and the tree refreshes. `aps.da.updateAppBundleAlias` (offered on an app bundle alias) SHALL prompt for the version and the optional receiver ID and repoint the alias; on success "App bundle alias updated" is shown. An empty receiver SHALL leave the receiver unset.
+`aps.da.createAppBundleAlias` (offered on an "Aliases" node of an app bundle) SHALL prompt for the alias name ("Enter alias name"), then a version ("Select app bundle version") from the bundle's versions, then an optional receiver ID ("Enter receiver ID (optional)"), and create the alias; on success "App bundle alias created" is shown and the tree refreshes. `aps.da.updateAppBundleAlias` (offered on an app bundle alias) SHALL prompt for the version and the optional receiver ID and repoint the alias; on success "App bundle alias updated" is shown and the tree refreshes. An empty receiver SHALL leave the receiver unset.
 
 #### Scenario: Creating an alias
 - **WHEN** the user enters a name, picks version 3, and leaves the receiver empty
@@ -214,7 +214,7 @@ Commands that act on a tree node SHALL require one. Invoking such a command with
 
 ### Requirement: Activity aliases
 
-`aps.da.createActivityAlias` (offered on an "Aliases" node of an activity) and `aps.da.updateActivityAlias` (offered on an activity alias) SHALL behave like their app bundle counterparts, with the version picker titled "Select activity version" and the messages "Activity alias created" and "Activity alias updated". Failures SHALL show "Could not create activity alias" or "Could not update activity alias".
+`aps.da.createActivityAlias` (offered on an "Aliases" node of an activity) and `aps.da.updateActivityAlias` (offered on an activity alias) SHALL behave like their app bundle counterparts, with the version picker titled "Select activity version" and the messages "Activity alias created" and "Activity alias updated"; the tree refreshes after each succeeds. Failures SHALL show "Could not create activity alias" or "Could not update activity alias".
 
 #### Scenario: Creating an activity alias
 - **WHEN** the user enters a name, picks a version, and an optional receiver

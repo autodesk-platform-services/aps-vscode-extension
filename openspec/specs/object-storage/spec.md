@@ -22,7 +22,7 @@ The view SHALL list the buckets owned by the application in the active environme
 
 ### Requirement: Pagination
 
-Buckets and objects SHALL be fetched one page at a time. The page size SHALL come from `autodesk.forge.data.pageSize` (clamped to 1–100). When more items remain, a trailing "Load more…" node SHALL be shown; selecting it (`aps.oss.loadMore`) SHALL fetch the next page and append it to that parent only.
+Buckets and objects SHALL be fetched one page at a time. The page size SHALL come from `autodesk.forge.data.pageSize` (clamped to 1–100; default 32). When more items remain, a trailing "Load more…" node SHALL be shown; selecting it (`aps.oss.loadMore`) SHALL fetch the next page and append it to that parent only.
 
 #### Scenario: More pages available
 - **WHEN** a page is returned with a continuation token
@@ -146,11 +146,11 @@ The user SHALL be able to view the full details of a bucket (`aps.oss.viewBucket
 
 ### Requirement: Create empty object
 
-`aps.oss.createEmptyObject` SHALL prompt for an object name and create a zero-byte object with that key in the chosen bucket, then refresh the view.
+`aps.oss.createEmptyObject` SHALL prompt for an object name and create a zero-byte object with that key in the chosen bucket, recording the content type from `autodesk.forge.data.defaultContentType` (or one picked from a list if that setting is empty), then refresh the view.
 
 #### Scenario: Successful creation
 - **WHEN** the user enters a name
-- **THEN** the object is created and "Object created: <objectId>" is shown
+- **THEN** the object is created with the configured content type and "Object created: <objectId>" is shown
 
 #### Scenario: Empty name
 - **WHEN** the user dismisses the name prompt or submits an empty name

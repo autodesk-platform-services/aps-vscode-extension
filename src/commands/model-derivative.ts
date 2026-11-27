@@ -381,14 +381,9 @@ export class ModelDerivativesCommands {
 			const action = await vscode.window.showInformationMessage(`
 				In order to access the thumbnails of ${id}, the object must be translated first.
 				Would you like to start the translation now?
-			`, TranslationActions.Translate, TranslationActions.TranslateAsArchive);
-			switch (action) {
-				case TranslationActions.Translate:
-					await this.translateObject(object);
-					break;
-				case TranslationActions.TranslateAsArchive:
-					await this.translateObject(object);
-					break;
+			`, TranslationActions.Translate);
+			if (action === TranslationActions.Translate) {
+				await this.translateObject(object);
 			}
 		}
 	}
@@ -501,8 +496,7 @@ function isDerivativePreviewState(value: unknown): value is IDerivativePreviewSt
 }
 
 enum TranslationActions {
-	Translate = 'Translate',
-	TranslateAsArchive = 'Translate as Archive'
+	Translate = 'Translate'
 }
 
 function getKey(object: ObjectDetails | IVersion): string {

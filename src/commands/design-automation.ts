@@ -109,6 +109,7 @@ export class DesignAutomationCommands {
 	async updateAppBundleAlias(entry?: IAppBundleAliasEntry) {
         entry = this.ensureInput(entry);
         await updateAppBundleAlias(entry.appbundle, entry.alias, this.context);
+        this.refresh();
 	}
 
 	async deleteAppBundleVersion(entry?: IAppBundleVersionEntry) {
@@ -163,6 +164,7 @@ export class DesignAutomationCommands {
 	async updateActivityAlias(entry?: IActivityAliasEntry) {
         entry = this.ensureInput(entry);
         await updateActivityAlias(entry.activity, entry.alias, this.context);
+        this.refresh();
 	}
 
 	async deleteActivityVersion(entry?: IActivityVersionEntry) {

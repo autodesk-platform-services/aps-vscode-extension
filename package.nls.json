@@ -168,7 +168,6 @@
     "configuration.viewer.env.description": "Custom Model Derivative environment used by the APS Viewer. By default, the viewer will determine the appropriate environment based on the viewable output format (SVF vs SVF2).",
     "configuration.viewer.api.description": "Custom Model Derivative API used by the APS Viewer. By default, the viewer will determine the appropriate API based on the viewable output format (SVF vs SVF2).",
     "configuration.data.defaultContentType.description": "When defined, all uploaded files and empty objects created in OSS will use this content type.",
-    "configuration.data.uploadChunkSize.description": "Size of individual chunks (in bytes) when uploading files to OSS with the resumable functionality.",
     "configuration.data.pageSize.description": "Number of buckets/objects to fetch per page in the Data & Derivatives (app) tree view, before showing a \"Load more\" item.",
     "configuration.data.hubsPageSize.description": "Number of projects/folder items/versions to fetch per page in the Data & Derivatives (user) tree view, before showing a \"Load more\" item.",
     "configuration.enableTeamAdminApi.description": "Enable the Team Admin (user) view for the Team Admin API (Beta). When enabled, signing in with 3-legged OAuth requests additional scopes (tmadmapi:team:read, tmadmapi:team-users:write, tmadmapi:team-products:write), so your APS app must have the Team Admin API enabled. Sign in again after changing this setting.",

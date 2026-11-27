@@ -94,4 +94,4 @@ Object-level commands (`aps.md.listViewables`, `aps.md.viewObjectManifest`, `aps
 
 #### Scenario: Object not translated
 - **WHEN** the manifest or thumbnails cannot be fetched
-- **THEN** a message explains the object must be translated first and offers Translate and Translate as Archive; both start the default SVF2 translation (see `model-derivative-translation`), and dismissing the message does nothing
+- **THEN** a message explains the object must be translated first and offers Translate, which starts the default SVF2 translation (see `model-derivative-translation`), and dismissing the message does nothing

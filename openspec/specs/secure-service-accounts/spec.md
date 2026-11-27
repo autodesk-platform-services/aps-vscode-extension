@@ -58,11 +58,11 @@ Every command that acts on an account SHALL, when run without a tree node (for e
 
 ### Requirement: Create account
 
-The title bar of the view SHALL offer `aps.ssa.createAccount`. It SHALL prompt in order for a username, a first name, and a last name, then create the account.
+The title bar of the view SHALL offer `aps.ssa.createAccount`. It SHALL prompt in order for a username, a first name, and a last name, then create the account and refresh the view.
 
 #### Scenario: Successful creation
 - **WHEN** the user enters all three values
-- **THEN** a "Creating secure service account" progress is shown and "Secure service account created: <e-mail>" is shown
+- **THEN** a "Creating secure service account" progress is shown, "Secure service account created: <e-mail>" is shown, and the new account appears in the view
 
 #### Scenario: Cancelling or empty input
 - **WHEN** the user dismisses any prompt or submits an empty value
@@ -71,8 +71,6 @@ The title bar of the view SHALL offer `aps.ssa.createAccount`. It SHALL prompt i
 #### Scenario: Creation fails
 - **WHEN** the API rejects the request
 - **THEN** an error message "Could not create secure service account" is shown
-
-Note: the tree is not refreshed automatically after creation; the user runs `aps.ssa.refreshAccounts` to see the new account.
 
 ### Requirement: View details and copy IDs
 

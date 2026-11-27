@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Work item header fields with a trailing `;`, an entry without `:`, or a value containing `:` no longer break the Create Work Item form
   - Cancelling the force download of a viewable tree or properties no longer opens an empty document, and network errors are no longer masked by a `TypeError`
   - Design Automation alias details and Hub Admin view-details/copy-ID commands that need a tree node are no longer listed in the Command Palette
+  - Empty objects created in OSS now get the configured content type
+  - Secure Service Accounts view and Design Automation view now refresh after creating an account or updating an alias
+- Changed
+  - The "Translate as Archive" button, which did the same as "Translate", is no longer offered when thumbnails are requested for an untranslated object
+- Removed
+  - The `autodesk.forge.data.uploadChunkSize` setting, which had no effect
 
 ## [3.10.0] - 2026-11-26
 

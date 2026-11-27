@@ -60,7 +60,6 @@ The extension exposes the following settings:
   - `designAutomationRegion`: Design Automation region (default `us-east`), for example `us-west` or another supported region
   - `designAutomationEndpoint`: full Design Automation API base URL, e.g. `https://developer.api.autodesk.com/da/us-east/v3`. When set, it overrides `host` and `designAutomationRegion` for Design Automation calls only; authentication and OSS still use `host`. Only use an endpoint you trust with your APS access token.
 - `autodesk.forge.data.defaultContentType`: content type to use for all files and empty objects uploaded to OSS (default `application/octet-stream`)
-- `autodesk.forge.data.uploadChunkSize`: size of individual chunks (in bytes) when uploading files to OSS with the resumable functionality (default `2097152`)
 - `autodesk.forge.data.pageSize`: number of buckets or objects to fetch per page in the _Data & Derivatives (app)_ view before showing a "Load more" item (default `32`)
 - `autodesk.forge.data.hubsPageSize`: number of projects, folder items, or versions to fetch per page in the _Data & Derivatives (user)_ view before showing a "Load more" item (default `32`)
 - `autodesk.forge.enableTeamAdminApi`: enable the _Team Admin (user)_ view for the Team Admin API (Beta). When enabled, signing in with 3-legged OAuth requests additional scopes (`tmadmapi:*`), so your APS app must have the Team Admin API enabled. Sign in again after changing this setting.
