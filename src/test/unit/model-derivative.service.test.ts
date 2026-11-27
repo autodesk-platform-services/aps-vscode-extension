@@ -379,4 +379,40 @@ describe('ModelDerivativeService', () => {
 			]);
 		});
 	});
+
+	describe('deleteManifest', () => {
+		const ossObject = { objectId: 'urn:adsk.objects:os.object:my-bucket/model.rvt', objectKey: 'model.rvt' };
+
+		it('resolves to true when the manifest was deleted', async () => {
+			let deletedUrn: string | undefined;
+			const fakeClient = { deleteManifest: async (urn: string) => { deletedUrn = urn; } };
+			const service = new ModelDerivativeService(fakeClient as any, {} as any, {} as any, {} as any);
+
+			assert.strictEqual(await service.deleteManifest(ossObject as any), true);
+			assert.strictEqual(deletedUrn, service.getObjectUrn(ossObject as any));
+		});
+
+		it('resolves to false when the object has no manifest (404)', async () => {
+			const fakeClient = { deleteManifest: async () => { throw Object.assign(new Error('Not Found'), { response: { status: 404 } }); } };
+			const service = new ModelDerivativeService(fakeClient as any, {} as any, {} as any, {} as any);
+
+			assert.strictEqual(await service.deleteManifest(ossObject as any), false);
+		});
+
+		it('rethrows any other error', async () => {
+			const failure = Object.assign(new Error('Forbidden'), { response: { status: 403 } });
+			const fakeClient = { deleteManifest: async () => { throw failure; } };
+			const service = new ModelDerivativeService(fakeClient as any, {} as any, {} as any, {} as any);
+
+			await assert.rejects(service.deleteManifest(ossObject as any), err => err === failure);
+		});
+
+		it('rethrows errors that carry no HTTP response', async () => {
+			const failure = new Error('network down');
+			const fakeClient = { deleteManifest: async () => { throw failure; } };
+			const service = new ModelDerivativeService(fakeClient as any, {} as any, {} as any, {} as any);
+
+			await assert.rejects(service.deleteManifest(ossObject as any), err => err === failure);
+		});
+	});
 });

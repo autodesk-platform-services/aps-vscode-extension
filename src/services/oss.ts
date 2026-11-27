@@ -147,6 +147,13 @@ export interface IUploadObjectOptions {
     signal?: AbortSignal;
 }
 
+export interface IDeleteObjectsResult {
+    /** Number of objects that were deleted successfully. */
+    deleted: number;
+    /** Number of objects whose deletion failed. */
+    failed: number;
+}
+
 export interface IDeleteObjectsOptions {
     /** Called after each batch completes with the progress increment (0-100) contributed by that batch. */
     onProgress?: (increment: number) => void;
@@ -301,11 +308,15 @@ export class OssService {
 
     /**
      * Creates an empty object by requesting a write-access signed URL and uploading a zero-byte body
-     * to it. Returns the new object's ID.
+     * to it, recording the given content type (if any) with the object. Returns the new object's ID.
      */
-    async createEmptyObject(bucketKey: string, objectKey: string): Promise<string> {
+    async createEmptyObject(bucketKey: string, objectKey: string, contentType?: string): Promise<string> {
         const signedUrl = await this.client.createSignedResource(bucketKey, objectKey, { access: Access.Write });
-        const response = await fetch(signedUrl.signedUrl, { method: 'PUT', body: new Uint8Array(0) });
+        const response = await fetch(signedUrl.signedUrl, {
+            method: 'PUT',
+            headers: contentType ? { 'Content-Type': contentType } : undefined,
+            body: new Uint8Array(0)
+        });
         if (!response.ok) {
             throw new Error(`Request failed with status code ${response.status}`);
         }
@@ -346,20 +357,41 @@ export class OssService {
         await this.client.deleteObject(bucketKey, objectKey);
     }
 
-    /** Deletes many objects in parallel batches, with optional progress reporting and cancellation. */
-    async deleteObjects(bucketKey: string, objectKeys: string[], options?: IDeleteObjectsOptions): Promise<void> {
+    /**
+     * Deletes many objects in parallel batches, with optional progress reporting and cancellation.
+     * Failures of individual objects do not stop the remaining deletions; they are counted in the result.
+     */
+    async deleteObjects(bucketKey: string, objectKeys: string[], options?: IDeleteObjectsOptions): Promise<IDeleteObjectsResult> {
+        const result: IDeleteObjectsResult = { deleted: 0, failed: 0 };
+        const len = objectKeys.length;
         let batch: Promise<unknown>[] = [];
-        for (let i = 0, len = objectKeys.length; i < len; i++) {
+        const flush = async () => {
+            const size = batch.length;
+            if (size === 0) {
+                return;
+            }
+            const outcomes = await Promise.allSettled(batch);
+            batch = [];
+            for (const outcome of outcomes) {
+                if (outcome.status === 'fulfilled') {
+                    result.deleted++;
+                } else {
+                    result.failed++;
+                }
+            }
+            options?.onProgress?.(100.0 * size / len);
+        };
+        for (const objectKey of objectKeys) {
             if (options?.isCancelled?.()) {
                 break;
             }
-            batch.push(this.client.deleteObject(bucketKey, objectKeys[i]));
-            if (batch.length === DeleteBatchSize || i === len - 1) {
-                await Promise.all(batch);
-                options?.onProgress?.(100.0 * batch.length / len);
-                batch = [];
+            batch.push(this.client.deleteObject(bucketKey, objectKey));
+            if (batch.length === DeleteBatchSize) {
+                await flush();
             }
         }
+        await flush();
+        return result;
     }
 
     createSignedUrl(bucketKey: string, objectKey: string, access: SignedUrlAccess): Promise<CreateObjectSigned> {

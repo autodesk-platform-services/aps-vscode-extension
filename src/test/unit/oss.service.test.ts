@@ -68,6 +68,22 @@ describe('OssService', () => {
 			assert.ok(Math.abs(progressIncrements.reduce((a, b) => a + b, 0) - 100) < 1e-9);
 		});
 
+		it('continues after individual failures and reports the counts', async () => {
+			const fakeClient = {
+				deleteObject: async (_bucketKey: string, objectKey: string) => {
+					if (objectKey === 'obj-1' || objectKey === 'obj-9') {
+						throw new Error('boom');
+					}
+				}
+			};
+			const objectKeys = Array.from({ length: 10 }, (_, i) => `obj-${i}`);
+
+			const service = new OssService(fakeClient as any);
+			const result = await service.deleteObjects('my-bucket', objectKeys);
+
+			assert.deepStrictEqual(result, { deleted: 8, failed: 2 });
+		});
+
 		it('stops early when isCancelled returns true', async () => {
 			const deleted: string[] = [];
 			const fakeClient = {
@@ -236,6 +252,38 @@ describe('OssService', () => {
 			assert.strictEqual(putRequest?.url, 'https://signed.example/upload');
 			assert.strictEqual(putRequest?.init.method, 'PUT');
 			assert.strictEqual((putRequest?.init.body as Uint8Array).length, 0);
+		});
+
+		it('records the given content type on the upload request', async () => {
+			let putInit: RequestInit | undefined;
+			global.fetch = (async (_url: string, init: RequestInit) => {
+				putInit = init;
+				return { ok: true, json: async () => ({ objectId: 'my-bucket/empty.txt' }) };
+			}) as any;
+			const fakeClient = {
+				createSignedResource: async () => ({ signedUrl: 'https://signed.example/upload' })
+			};
+
+			const service = new OssService(fakeClient as any);
+			await service.createEmptyObject('my-bucket', 'empty.txt', 'text/plain');
+
+			assert.deepStrictEqual(putInit?.headers, { 'Content-Type': 'text/plain' });
+		});
+
+		it('sends no Content-Type header when no content type is given', async () => {
+			let putInit: RequestInit | undefined;
+			global.fetch = (async (_url: string, init: RequestInit) => {
+				putInit = init;
+				return { ok: true, json: async () => ({ objectId: 'my-bucket/empty.txt' }) };
+			}) as any;
+			const fakeClient = {
+				createSignedResource: async () => ({ signedUrl: 'https://signed.example/upload' })
+			};
+
+			const service = new OssService(fakeClient as any);
+			await service.createEmptyObject('my-bucket', 'empty.txt');
+
+			assert.strictEqual(putInit?.headers, undefined);
 		});
 
 		it('throws when the upload response is not ok', async () => {

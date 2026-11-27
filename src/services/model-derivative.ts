@@ -248,10 +248,21 @@ export class ModelDerivativeService {
         return this.clientForUrn(urn).getManifest(urn, this.regionArg);
     }
 
-    /** Deletes the manifest (and all derivatives) of a tree object. */
-    async deleteManifest(object: ObjectDetails | IVersion): Promise<void> {
+    /**
+     * Deletes the manifest (and all derivatives) of a tree object. Resolves to `true` if a manifest
+     * was deleted, or `false` if the object has no manifest (the API answers 404); other errors are rethrown.
+     */
+    async deleteManifest(object: ObjectDetails | IVersion): Promise<boolean> {
         const urn = this.getObjectUrn(object);
-        await this.clientForUrn(urn).deleteManifest(urn, this.regionArg);
+        try {
+            await this.clientForUrn(urn).deleteManifest(urn, this.regionArg);
+            return true;
+        } catch (err: any) {
+            if (err?.response?.status === 404) {
+                return false;
+            }
+            throw err;
+        }
     }
 
     /** Fetches a viewable's object tree; pass `forceGet` to bypass the 20 MB response limit. */

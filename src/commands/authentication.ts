@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { IContext, command, withProgress } from '../common';
-import { ApsAuthenticationProvider } from '../auth-provider';
+import { ApsAuthenticationProvider, isLoginCancelled } from '../auth-provider';
 
 export class AuthenticationCommands {
     constructor(protected context: IContext, protected authProvider: ApsAuthenticationProvider) {
@@ -20,7 +20,10 @@ export class AuthenticationCommands {
             // persists the session. The extension's onDidChangeSessions handler rebuilds the services.
             await vscode.authentication.getSession(ApsAuthenticationProvider.id, [], { createIfNone: true, clearSessionPreference: true });
         } catch (err) {
-            vscode.window.showWarningMessage(`Could not log in: ${err}`);
+            if (isLoginCancelled(err)) {
+                return;
+            }
+            vscode.window.showWarningMessage(`Could not log in: ${err instanceof Error ? err.message : err}`);
         }
     }
 

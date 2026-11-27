@@ -47,6 +47,7 @@ export class SecureServiceAccountsCommands {
             this.context.secureServiceAccountsService.createServiceAccount(name, firstName, lastName)
         );
         vscode.window.showInformationMessage(`Secure service account created: ${email}`);
+        this.refresh();
     }
 
     async viewAccountDetails(secureServiceAccount: ISecureServiceAccount | undefined) {

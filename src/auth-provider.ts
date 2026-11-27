@@ -72,7 +72,7 @@ export class ApsAuthenticationProvider implements vscode.AuthenticationProvider,
         const env = this.getContext().environment;
         const kind = await this.pickMode();
         if (!kind) {
-            throw new Error(vscode.l10n.t('Login cancelled.'));
+            throw loginCancelledError();
         }
         const session = await this.runModeFlow(env, kind, [...scopes]);
         await this.secrets.store(this.secretKey(env), JSON.stringify(session));
@@ -254,7 +254,7 @@ export class ApsAuthenticationProvider implements vscode.AuthenticationProvider,
             case 'manual-token': {
                 const token = await vscode.window.showInputBox({ prompt: vscode.l10n.t('Paste an APS access token'), password: true, ignoreFocusOut: true });
                 if (!token) {
-                    throw new Error('No access token provided.');
+                    throw loginCancelledError();
                 }
                 const chosenScopes = scopes.length > 0 ? scopes : authenticationService.defaultScopes;
                 return { ...base, mode: { kind }, scopes: chosenScopes, label: 'manual token', accessToken: token, expiresAt: 0 };
@@ -271,7 +271,7 @@ export class ApsAuthenticationProvider implements vscode.AuthenticationProvider,
         }
         const email = await vscode.window.showQuickPick(accounts.map(account => account.email), { placeHolder: vscode.l10n.t('Select secure service account'), ignoreFocusOut: true });
         if (!email) {
-            throw new Error(vscode.l10n.t('Login cancelled.'));
+            throw loginCancelledError();
         }
         const account = accounts.find(a => a.email === email)!;
 
@@ -281,17 +281,20 @@ export class ApsAuthenticationProvider implements vscode.AuthenticationProvider,
         }
         const keyId = await vscode.window.showQuickPick(keys.map(key => key.id), { placeHolder: vscode.l10n.t('Select key'), ignoreFocusOut: true });
         if (!keyId) {
-            throw new Error(vscode.l10n.t('Login cancelled.'));
+            throw loginCancelledError();
         }
 
         const privateKeyFile = await vscode.window.showOpenDialog({ canSelectMany: false, openLabel: vscode.l10n.t('Select private key file for key ID {0}', keyId), filters: { [vscode.l10n.t('PEM Files')]: ['pem'], [vscode.l10n.t('All Files')]: ['*'] } });
         if (!privateKeyFile || privateKeyFile.length !== 1) {
-            throw new Error(vscode.l10n.t('No private key file selected.'));
+            throw loginCancelledError();
         }
         const privateKey = Buffer.from(await vscode.workspace.fs.readFile(privateKeyFile[0])).toString('utf8');
 
         const scopes = await vscode.window.showQuickPick(authenticationService.defaultScopes, { canPickMany: true, placeHolder: vscode.l10n.t('Select scopes'), ignoreFocusOut: true });
-        if (!scopes || scopes.length === 0) {
+        if (!scopes) {
+            throw loginCancelledError();
+        }
+        if (scopes.length === 0) {
             throw new Error(vscode.l10n.t('No scopes selected.'));
         }
 
@@ -307,4 +310,17 @@ export class ApsAuthenticationProvider implements vscode.AuthenticationProvider,
             expiresAt: Date.now() + (token.expires_in ?? 3600) * 1000
         };
     }
+}
+
+/** Creates the error thrown when the user dismisses a step of the sign-in flow. */
+function loginCancelledError(): Error {
+    return new Error(vscode.l10n.t('Login cancelled.'));
+}
+
+/**
+ * Whether `err` means the user cancelled signing in. Matches by message because errors thrown by an
+ * authentication provider cross VS Code's RPC boundary, which loses their class.
+ */
+export function isLoginCancelled(err: unknown): boolean {
+    return err instanceof Error && (err.message === vscode.l10n.t('Login cancelled.') || err.message === 'User did not consent to login.');
 }
