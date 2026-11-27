@@ -7,7 +7,9 @@ on:
 permissions:
   contents: read
   issues: read
-engine: copilot
+engine:
+  id: copilot
+  copilot-sdk: true
 network:
   allowed:
     - defaults
