@@ -18,6 +18,8 @@
 - [x] 3.1 Confirm `aps.oss.deleteObject` still matches its registration and menu entry; no ID or placement change is expected
 - [x] 3.2 Keep `package.nls.json` titles consistent (sentence case for any new text)
 
+- [x] 3.3 Hide single-node commands in the Data Management view when several nodes are selected (`!listMultiSelection`), keeping `aps.oss.deleteObject` available
+
 ## 4. Docs and verification
 
 - [x] 4.1 Add an `Added` entry to `[Unreleased]` in `CHANGELOG.md`

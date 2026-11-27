@@ -363,12 +363,15 @@ export class OssService {
      */
     async deleteObjects(bucketKey: string, objectKeys: string[], options?: IDeleteObjectsOptions): Promise<IDeleteObjectsResult> {
         const result: IDeleteObjectsResult = { deleted: 0, failed: 0 };
-        for (let i = 0, len = objectKeys.length; i < len; i += DeleteBatchSize) {
-            if (options?.isCancelled?.()) {
-                break;
+        const len = objectKeys.length;
+        let batch: Promise<unknown>[] = [];
+        const flush = async () => {
+            const size = batch.length;
+            if (size === 0) {
+                return;
             }
-            const batch = objectKeys.slice(i, i + DeleteBatchSize);
-            const outcomes = await Promise.allSettled(batch.map(key => this.client.deleteObject(bucketKey, key)));
+            const outcomes = await Promise.allSettled(batch);
+            batch = [];
             for (const outcome of outcomes) {
                 if (outcome.status === 'fulfilled') {
                     result.deleted++;
@@ -376,8 +379,18 @@ export class OssService {
                     result.failed++;
                 }
             }
-            options?.onProgress?.(100.0 * batch.length / len);
+            options?.onProgress?.(100.0 * size / len);
+        };
+        for (const objectKey of objectKeys) {
+            if (options?.isCancelled?.()) {
+                break;
+            }
+            batch.push(this.client.deleteObject(bucketKey, objectKey));
+            if (batch.length === DeleteBatchSize) {
+                await flush();
+            }
         }
+        await flush();
         return result;
     }
 

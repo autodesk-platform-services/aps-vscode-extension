@@ -19,8 +19,8 @@ The Data Management (app) view SHALL allow selecting several nodes at once. Comm
 - **THEN** nothing is deleted and no confirmation is shown
 
 #### Scenario: Context menu on a multi-selection
-- **WHEN** the user right-clicks within a selection of several object nodes
-- **THEN** the delete command is offered
+- **WHEN** the user right-clicks within a selection of several nodes
+- **THEN** only the delete command (`aps.oss.deleteObject`) is offered, and commands that operate on a single node (such as view details, copy key, download, rename, copy, signed URL, and the Model Derivative actions) are not shown
 
 ## MODIFIED Requirements
 
