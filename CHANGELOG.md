@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.11.0] - 2026-11-27
+
 - Added
   - Multiple objects can be selected in the Data Management view and deleted at once with "Delete Object"
 - Fixed
