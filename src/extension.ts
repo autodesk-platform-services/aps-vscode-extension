@@ -79,8 +79,8 @@ export async function activate(_context: vscode.ExtensionContext) {
 	const teamAdminDataProvider = new TeamAdminDataProvider(context);
 	const tokenFlexDataProvider = new TokenFlexDataProvider(context);
 	const bspReportingDataProvider = new BspReportingDataProvider(context);
-	const providers: { viewId: string; provider: BaseTreeProvider<any>; user: boolean; dragAndDrop?: boolean }[] = [
-		{ viewId: 'apsDataManagementView', provider: simpleStorageDataProvider, user: false, dragAndDrop: true },
+	const providers: { viewId: string; provider: BaseTreeProvider<any>; user: boolean; dragAndDrop?: boolean; canSelectMany?: boolean }[] = [
+		{ viewId: 'apsDataManagementView', provider: simpleStorageDataProvider, user: false, dragAndDrop: true, canSelectMany: true },
 		{ viewId: 'apsHubsView', provider: hubsDataProvider, user: true },
 		{ viewId: 'apsIssuesView', provider: issuesDataProvider, user: true },
 		{ viewId: 'apsDesignAutomationView', provider: designAutomationDataProvider, user: false },
@@ -93,9 +93,10 @@ export async function activate(_context: vscode.ExtensionContext) {
 		{ viewId: 'apsTokenFlexView', provider: tokenFlexDataProvider, user: true },
 		{ viewId: 'apsBspReportingView', provider: bspReportingDataProvider, user: true }
 	];
-	for (const { viewId, provider, dragAndDrop } of providers) {
+	for (const { viewId, provider, dragAndDrop, canSelectMany } of providers) {
 		const view = vscode.window.createTreeView(viewId, {
 			treeDataProvider: provider,
+			canSelectMany: !!canSelectMany,
 			...(dragAndDrop ? { dragAndDropController: provider as unknown as vscode.TreeDragAndDropController<any> } : {})
 		});
 		context.extensionContext.subscriptions.push(view);

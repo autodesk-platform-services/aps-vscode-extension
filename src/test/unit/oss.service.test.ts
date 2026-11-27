@@ -68,6 +68,22 @@ describe('OssService', () => {
 			assert.ok(Math.abs(progressIncrements.reduce((a, b) => a + b, 0) - 100) < 1e-9);
 		});
 
+		it('continues after individual failures and reports the counts', async () => {
+			const fakeClient = {
+				deleteObject: async (_bucketKey: string, objectKey: string) => {
+					if (objectKey === 'obj-1' || objectKey === 'obj-9') {
+						throw new Error('boom');
+					}
+				}
+			};
+			const objectKeys = Array.from({ length: 10 }, (_, i) => `obj-${i}`);
+
+			const service = new OssService(fakeClient as any);
+			const result = await service.deleteObjects('my-bucket', objectKeys);
+
+			assert.deepStrictEqual(result, { deleted: 8, failed: 2 });
+		});
+
 		it('stops early when isCancelled returns true', async () => {
 			const deleted: string[] = [];
 			const fakeClient = {

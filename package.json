@@ -1178,47 +1178,47 @@
             "view/item/context": [
                 {
                     "command": "aps.oss.viewBucketDetails",
-                    "when": "view == apsDataManagementView && (viewItem == bucket || viewItem == bucket-filtered)",
+                    "when": "view == apsDataManagementView && !listMultiSelection && (viewItem == bucket || viewItem == bucket-filtered)",
                     "group": "0_view@1"
                 },
                 {
                     "command": "aps.oss.copyBucketKey",
-                    "when": "view == apsDataManagementView && (viewItem == bucket || viewItem == bucket-filtered)",
+                    "when": "view == apsDataManagementView && !listMultiSelection && (viewItem == bucket || viewItem == bucket-filtered)",
                     "group": "0_view@2"
                 },
                 {
                     "command": "aps.oss.deleteBucketObjects",
-                    "when": "view == apsDataManagementView && (viewItem == bucket || viewItem == bucket-filtered)",
+                    "when": "view == apsDataManagementView && !listMultiSelection && (viewItem == bucket || viewItem == bucket-filtered)",
                     "group": "3_remove@1"
                 },
                 {
                     "submenu": "aps.submenu.view",
-                    "when": "(view == apsDataManagementView && viewItem == object) || (view == apsHubsView && viewItem == version) || viewItem == derivative || (view == apsDesignAutomationView && viewItem == appbundle-alias) || (view == apsDesignAutomationView && viewItem == activity-alias) || ((view == apsHubAdminAppView || view == apsHubAdminUserView) && (viewItem == 'hub-admin-hub' || viewItem == 'hub-admin-user' || viewItem == 'hub-admin-project' || viewItem == 'hub-admin-project-user' || viewItem == 'hub-admin-company'))",
+                    "when": "(view == apsDataManagementView && !listMultiSelection && viewItem == object) || (view == apsHubsView && viewItem == version) || viewItem == derivative || (view == apsDesignAutomationView && viewItem == appbundle-alias) || (view == apsDesignAutomationView && viewItem == activity-alias) || ((view == apsHubAdminAppView || view == apsHubAdminUserView) && (viewItem == 'hub-admin-hub' || viewItem == 'hub-admin-user' || viewItem == 'hub-admin-project' || viewItem == 'hub-admin-project-user' || viewItem == 'hub-admin-company'))",
                     "group": "0_view@1"
                 },
                 {
                     "command": "aps.oss.uploadObject",
-                    "when": "view == apsDataManagementView && (viewItem == bucket || viewItem == bucket-filtered)",
+                    "when": "view == apsDataManagementView && !listMultiSelection && (viewItem == bucket || viewItem == bucket-filtered)",
                     "group": "1_action@1"
                 },
                 {
                     "command": "aps.oss.createEmptyObject",
-                    "when": "view == apsDataManagementView && (viewItem == bucket || viewItem == bucket-filtered)",
+                    "when": "view == apsDataManagementView && !listMultiSelection && (viewItem == bucket || viewItem == bucket-filtered)",
                     "group": "1_action@2"
                 },
                 {
                     "command": "aps.oss.filterObjects",
-                    "when": "view == apsDataManagementView && (viewItem == bucket || viewItem == bucket-filtered)",
+                    "when": "view == apsDataManagementView && !listMultiSelection && (viewItem == bucket || viewItem == bucket-filtered)",
                     "group": "inline@1"
                 },
                 {
                     "command": "aps.oss.clearObjectsFilter",
-                    "when": "view == apsDataManagementView && viewItem == bucket-filtered",
+                    "when": "view == apsDataManagementView && !listMultiSelection && viewItem == bucket-filtered",
                     "group": "inline@2"
                 },
                 {
                     "submenu": "aps.submenu.actions",
-                    "when": "(view == apsDataManagementView && viewItem == object) || (view == apsSecureServiceAccountsView && viewItem == 'secure-service-account-key')",
+                    "when": "(view == apsDataManagementView && !listMultiSelection && viewItem == object) || (view == apsSecureServiceAccountsView && viewItem == 'secure-service-account-key')",
                     "group": "1_action@1"
                 },
                 {
@@ -1228,7 +1228,7 @@
                 },
                 {
                     "command": "aps.oss.deleteBucket",
-                    "when": "view == apsDataManagementView && (viewItem == bucket || viewItem == bucket-filtered)",
+                    "when": "view == apsDataManagementView && !listMultiSelection && (viewItem == bucket || viewItem == bucket-filtered)",
                     "group": "3_remove@2"
                 },
                 {
@@ -1263,17 +1263,17 @@
                 },
                 {
                     "submenu": "aps.submenu.modelDerivative",
-                    "when": "(view == apsDataManagementView && viewItem == object) || (view == apsHubsView && viewItem == version)",
+                    "when": "(view == apsDataManagementView && !listMultiSelection && viewItem == object) || (view == apsHubsView && viewItem == version)",
                     "group": "1_action_md@1"
                 },
                 {
                     "command": "aps.md.deleteObjectManifest",
-                    "when": "view == apsDataManagementView && viewItem == object",
+                    "when": "view == apsDataManagementView && !listMultiSelection && viewItem == object",
                     "group": "3_remove@2"
                 },
                 {
                     "command": "aps.md.downloadDerivativeCustom",
-                    "when": "(view == apsDataManagementView || view == apsHubsView) && viewItem == non-viewable-derivative",
+                    "when": "(view == apsDataManagementView || view == apsHubsView) && viewItem == non-viewable-derivative && !listMultiSelection",
                     "group": "1_action_md"
                 },
                 {
@@ -1590,22 +1590,22 @@
             "aps.submenu.view": [
                 {
                     "command": "aps.oss.viewObjectDetails",
-                    "when": "view == apsDataManagementView && viewItem == object",
+                    "when": "view == apsDataManagementView && !listMultiSelection && viewItem == object",
                     "group": "0_view@1"
                 },
                 {
                     "command": "aps.oss.copyObjectKey",
-                    "when": "view == apsDataManagementView && viewItem == object",
+                    "when": "view == apsDataManagementView && !listMultiSelection && viewItem == object",
                     "group": "0_view@2"
                 },
                 {
                     "command": "aps.md.viewObjectThumbnail",
-                    "when": "(view == apsDataManagementView && viewItem == object) || (view == apsHubsView && viewItem == version)",
+                    "when": "(view == apsDataManagementView && !listMultiSelection && viewItem == object) || (view == apsHubsView && viewItem == version)",
                     "group": "0_view@3"
                 },
                 {
                     "command": "aps.md.viewObjectManifest",
-                    "when": "(view == apsDataManagementView && viewItem == object) || (view == apsHubsView && viewItem == version)",
+                    "when": "(view == apsDataManagementView && !listMultiSelection && viewItem == object) || (view == apsHubsView && viewItem == version)",
                     "group": "0_view@4"
                 },
                 {
@@ -1697,22 +1697,22 @@
             "aps.submenu.actions": [
                 {
                     "command": "aps.oss.downloadObject",
-                    "when": "view == apsDataManagementView && viewItem == object",
+                    "when": "view == apsDataManagementView && !listMultiSelection && viewItem == object",
                     "group": "1_action@1"
                 },
                 {
                     "command": "aps.oss.renameObject",
-                    "when": "view == apsDataManagementView && viewItem == object",
+                    "when": "view == apsDataManagementView && !listMultiSelection && viewItem == object",
                     "group": "1_action@2"
                 },
                 {
                     "command": "aps.oss.copyObject",
-                    "when": "view == apsDataManagementView && viewItem == object",
+                    "when": "view == apsDataManagementView && !listMultiSelection && viewItem == object",
                     "group": "1_action@3"
                 },
                 {
                     "command": "aps.oss.generateSignedUrl",
-                    "when": "view == apsDataManagementView && viewItem == object",
+                    "when": "view == apsDataManagementView && !listMultiSelection && viewItem == object",
                     "group": "1_action@4"
                 },
                 {
@@ -1734,22 +1734,22 @@
             "aps.submenu.modelDerivative": [
                 {
                     "command": "aps.md.copyObjectUrn",
-                    "when": "(view == apsDataManagementView && viewItem == object) || (view == apsHubsView && viewItem == version)",
+                    "when": "(view == apsDataManagementView && !listMultiSelection && viewItem == object) || (view == apsHubsView && viewItem == version)",
                     "group": "1_action_md@1"
                 },
                 {
                     "command": "aps.md.translateObject",
-                    "when": "(view == apsDataManagementView && viewItem == object) || (view == apsHubsView && viewItem == version)",
+                    "when": "(view == apsDataManagementView && !listMultiSelection && viewItem == object) || (view == apsHubsView && viewItem == version)",
                     "group": "1_action_md@2"
                 },
                 {
                     "command": "aps.md.translateObjectCustom",
-                    "when": "(view == apsDataManagementView && viewItem == object) || (view == apsHubsView && viewItem == version)",
+                    "when": "(view == apsDataManagementView && !listMultiSelection && viewItem == object) || (view == apsHubsView && viewItem == version)",
                     "group": "1_action_md@3"
                 },
                 {
                     "command": "aps.md.listViewables",
-                    "when": "(view == apsDataManagementView && viewItem == object) || (view == apsHubsView && viewItem == version)",
+                    "when": "(view == apsDataManagementView && !listMultiSelection && viewItem == object) || (view == apsHubsView && viewItem == version)",
                     "group": "1_action_md@4"
                 }
             ],
