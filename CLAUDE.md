@@ -146,6 +146,36 @@ packaged — add new runtime assets there explicitly.
 (`NODE_ENV=production`: minified, no sourcemaps). `yarn typecheck` runs `tsc --noEmit` (type-checking
 only — esbuild does all emitting). There is no separate lint/format step.
 
+## Specs (OpenSpec)
+
+The project follows spec-driven development with [OpenSpec](https://github.com/Fission-AI/OpenSpec).
+`openspec/specs/<capability>/spec.md` is the source of truth for **user-observable behavior**:
+commands, views, settings, prompts, confirmations, and results. One spec per capability, mirroring
+the service domains: `environment-management`, `authentication`, `readonly-content-viewer`,
+`object-storage`, `data-management`, `issues`, `model-derivative-translation`,
+`model-derivative-inspection`, `viewer-preview`, `design-automation`, `webhooks`,
+`secure-service-accounts`, `hub-admin`, `team-admin`, `token-flex`, `bsp-reporting`, and
+`language-model-tools`. Project context and artifact rules live in `openspec/config.yaml`. Specs don't
+cover architecture or file layout — that stays in this file.
+
+- **Behavior changes start as an OpenSpec change**, not as code. Run the propose step (`/opsx:propose`
+  or the `openspec-propose` skill) to generate the proposal, design, delta specs, and tasks under
+  `openspec/changes/<name>/`; review them before writing code. Then implement with
+  `openspec-apply-change`, and merge the deltas into `openspec/specs/` with `openspec-archive-change`.
+  Use `openspec-explore` first when the idea is still vague.
+- **Read the relevant spec before changing a capability**, and treat a mismatch between spec and code
+  as something to resolve explicitly: fix the code, or change the spec through a change. Never silently
+  diverge from a spec.
+- **Skip the change workflow** for work with no observable effect: typos, comments, dependency bumps,
+  test-only changes, and pure refactors.
+- **Don't spec settings that nothing reads.** A setting declared in `package.json` but never read in
+  `src/` stays out of the specs.
+- **Keep specs valid:** run `openspec validate --specs` after editing any spec. Long requirements
+  (over 500 characters) only produce warnings, but prefer splitting them.
+- Archiving a change is part of the same PR as the code, so specs never lag behind the implementation.
+  The CHANGELOG, command-sync, and `yarn typecheck`/`yarn test` rules in
+  [Conventions](#conventions) still apply to every change.
+
 ## Conventions
 
 - **Commands and `package.json` contributes are hand-synced, not generated.** Each `*Commands` class in
