@@ -74,7 +74,7 @@ Each entry of `autodesk.forge.environments` MAY set `designAutomationRegion` and
 
 ### Requirement: Tree-only invocation
 
-Commands that act on a tree node SHALL require one. Invoking such a command without a node (for example, from the Command Palette) SHALL fail with the message "This command can only be triggered from the tree view." Commands that can run without a node are `aps.da.refreshDesignAutomationTree`, `aps.da.createAppBundle`, `aps.da.createActivity`, `aps.da.viewAppBundleDetails`, `aps.da.viewAppBundleAliasDetails`, and `aps.da.viewActivityAliasDetails`.
+Commands that act on a tree node SHALL require one. Invoking such a command without a node (for example, from the Command Palette) SHALL fail with the message "This command can only be triggered from the tree view." Commands that can run without a node are `aps.da.refreshDesignAutomationTree`, `aps.da.createAppBundle`, `aps.da.createActivity`, and `aps.da.viewAppBundleDetails`. The alias details commands `aps.da.viewAppBundleAliasDetails` and `aps.da.viewActivityAliasDetails` require a node and are hidden from the Command Palette.
 
 #### Scenario: Command Palette invocation of a node command
 - **WHEN** the user runs `aps.da.deleteActivity` from the Command Palette
@@ -106,15 +106,15 @@ Commands that act on a tree node SHALL require one. Invoking such a command with
 
 ### Requirement: View app bundle details
 
-`aps.da.viewAppBundleDetails` SHALL open the app bundle's details as read-only JSON, for a shared app bundle or an app bundle alias node. When run without a node, it SHALL prompt for an app bundle via a quick pick ("Select app bundle") listing app bundle full IDs without `$LATEST` entries, with the most recently used first. `aps.da.viewAppBundleAliasDetails` SHALL open the details of a single alias as read-only JSON, prompting in the same way when run without a node. `aps.da.viewAppBundleVersionDetails` (offered on an app bundle version) SHALL open the details of that version.
+`aps.da.viewAppBundleDetails` SHALL open the app bundle's details as read-only JSON, for a shared app bundle or an app bundle alias node. When run without a node, it SHALL prompt for an app bundle via a quick pick ("Select app bundle") listing app bundle full IDs without `$LATEST` entries, with the most recently used first. `aps.da.viewAppBundleAliasDetails` (offered on an app bundle alias; hidden from the Command Palette) SHALL open the details of a single alias as read-only JSON. `aps.da.viewAppBundleVersionDetails` (offered on an app bundle version) SHALL open the details of that version.
 
 #### Scenario: Viewing from the tree
 - **WHEN** the user runs `aps.da.viewAppBundleDetails` on an app bundle alias or shared app bundle
 - **THEN** the details are fetched with a progress notification and shown in a read-only JSON editor
 
-#### Scenario: Viewing from the Command Palette
-- **WHEN** the user runs `aps.da.viewAppBundleAliasDetails` without a node and picks an app bundle
-- **THEN** the details of the picked alias are shown
+#### Scenario: Alias details are not offered in the Command Palette
+- **WHEN** the user opens the Command Palette
+- **THEN** neither `aps.da.viewAppBundleAliasDetails` nor `aps.da.viewActivityAliasDetails` is listed
 
 #### Scenario: Cancelling the picker
 - **WHEN** the user dismisses the app bundle picker
@@ -162,7 +162,7 @@ Commands that act on a tree node SHALL require one. Invoking such a command with
 
 ### Requirement: View activity details
 
-`aps.da.viewActivityDetails` (shared activity, activity alias), `aps.da.viewActivityVersionDetails` (activity version), and `aps.da.viewActivityAliasDetails` (activity alias) SHALL open the corresponding details as read-only JSON after a progress notification "Getting activity details: <id>". `aps.da.viewActivityDetails` and `aps.da.viewActivityVersionDetails` SHALL require a tree node.
+`aps.da.viewActivityDetails` (shared activity, activity alias), `aps.da.viewActivityVersionDetails` (activity version), and `aps.da.viewActivityAliasDetails` (activity alias; hidden from the Command Palette) SHALL open the corresponding details as read-only JSON after a progress notification "Getting activity details: <id>". All three SHALL require a tree node.
 
 #### Scenario: Viewing activity details
 - **WHEN** the user runs `aps.da.viewActivityDetails` on an activity alias
@@ -226,7 +226,7 @@ Commands that act on a tree node SHALL require one. Invoking such a command with
 
 ### Requirement: Create work item
 
-`aps.da.createWorkItem` (offered on a shared activity and, in the manage submenu, on an activity alias) SHALL load the activity's details with a progress notification and open a "Create Work Item: <activity id>" webview form listing one row per activity parameter with: name, value (URL), verb (GET/PUT/POST/PATCH/READ, defaulting to the parameter's verb), optional, local name, path in zip, and headers (entered as `HeaderA:ValueA;HeaderB:ValueB`). On "Create", the work item SHALL be submitted and the extension SHALL monitor it in a cancellable notification "Processing workitem", polling every 5 seconds and showing the current status, until it is no longer pending or in progress. The form SHALL stay open so the user can submit another work item.
+`aps.da.createWorkItem` (offered on a shared activity and, in the manage submenu, on an activity alias) SHALL load the activity's details with a progress notification and open a "Create Work Item: <activity id>" webview form listing one row per activity parameter with: name, value (URL), verb (GET/PUT/POST/PATCH/READ, defaulting to the parameter's verb), optional, local name, path in zip, and headers (entered as `HeaderA:ValueA;HeaderB:ValueB`; entries are split on the first `:` so values may contain colons, and empty entries or entries without a name or `:` are ignored). On "Create", the work item SHALL be submitted and the extension SHALL monitor it in a cancellable notification "Processing workitem", polling every 5 seconds and showing the current status, until it is no longer pending or in progress. The form SHALL stay open so the user can submit another work item.
 
 #### Scenario: Successful work item
 - **WHEN** the work item finishes with status `success`

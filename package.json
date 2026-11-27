@@ -1028,6 +1028,50 @@
                     "when": "false"
                 },
                 {
+                    "command": "aps.da.viewAppBundleAliasDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.da.viewActivityAliasDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.viewHubDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.viewUserDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.copyUserID",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.viewProjectDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.copyProjectID",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.viewProjectUserDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.copyProjectUserID",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.viewCompanyDetails",
+                    "when": "false"
+                },
+                {
+                    "command": "aps.hubAdmin.copyCompanyID",
+                    "when": "false"
+                },
+                {
                     "command": "aps.tokenFlex.viewContractDetails",
                     "when": "false"
                 },

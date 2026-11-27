@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { TextField, Dropdown, Button, Option, DataGrid, DataGridRow, DataGridCell, Checkbox } from './components/controls';
 import { IActivityDetail, IActivityParam, IWorkItemParam } from '../models/design-automation-api';
 import { postMessage } from './common';
+import { parseHeaders } from './work-item-headers';
 import { Actions } from './components/Actions';
 
 export type ICreateWorkItemMessage = {
@@ -45,11 +46,7 @@ function packParameters(params: IParameter[]): ({ [key: string]: IWorkItemParam 
             verb: param.verb
         };
         if (param.headers) {
-            map[param.name].headers = {};
-            for (const header of param.headers.trim().split(';')) {
-                const tokens = header.split(':');
-                (map[param.name].headers as any)[tokens[0].trim()] = tokens[1].trim();
-            }
+            map[param.name].headers = parseHeaders(param.headers);
         }
     }
     return map;

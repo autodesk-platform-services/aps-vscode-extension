@@ -116,9 +116,9 @@ The user SHALL be able to open the full details of a node as a read-only JSON do
 - **WHEN** fetching the details fails
 - **THEN** an error is shown with the title "Could not retrieve hub details", "Could not retrieve hub admin user details", "Could not retrieve hub admin project details", "Could not retrieve project user details", or "Could not retrieve hub admin company details", matching the command
 
-#### Scenario: Run from the command palette
-- **WHEN** a view-details or copy-ID command is invoked without a tree node
-- **THEN** the command has no node to act on and fails with an error rather than prompting for one
+#### Scenario: Not offered in the command palette
+- **WHEN** the user opens the Command Palette
+- **THEN** none of the view-details or copy-ID commands is listed, because they act on a tree node
 
 ### Requirement: Copy IDs
 

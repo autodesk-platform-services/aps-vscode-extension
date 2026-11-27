@@ -90,7 +90,7 @@ The translation commands SHALL accept a tree node as their target: an OSS object
 
 ### Requirement: Delete manifest
 
-`aps.md.deleteObjectManifest` SHALL delete the manifest, and therefore all derivatives, of an OSS object after an explicit modal confirmation.
+`aps.md.deleteObjectManifest` SHALL delete the manifest, and therefore all derivatives, of an OSS object after an explicit modal confirmation. It SHALL report success only when a manifest was actually deleted.
 
 #### Scenario: Confirmed deletion
 - **WHEN** the user confirms the modal "Are you sure you want to delete manifest for <urn>? This action cannot be undone." with Delete
@@ -101,8 +101,12 @@ The translation commands SHALL accept a tree node as their target: an OSS object
 - **THEN** nothing is deleted and the tree is not refreshed
 
 #### Scenario: Object has no manifest
-- **WHEN** deleting the manifest fails because the object was never translated
-- **THEN** a message offers to start the translation now with Translate or Translate as Archive (both start the default SVF2 translation); the subsequent "Derivatives deleted" message is still shown
+- **WHEN** the user confirms the deletion and the object has no manifest because it was never translated
+- **THEN** "No derivatives to delete: <object key>" is shown, no translation is offered, "Derivatives deleted" is not shown, and the tree is refreshed
+
+#### Scenario: Deletion request fails
+- **WHEN** the delete request fails for any reason other than a missing manifest (for example a network, authorization, or server error)
+- **THEN** an error "Could not delete derivatives" is shown with the failure details, "Derivatives deleted" is not shown, and the tree is refreshed
 
 #### Scenario: Unexpected failure
 - **WHEN** a failure occurs outside the deletion request (for example while prompting)

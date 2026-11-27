@@ -28,13 +28,13 @@ Views and commands that use the application's own credentials (object storage, D
 - **WHEN** the user completes any sign-in mode
 - **THEN** the session is stored, `aps:userSession` is set, and the user views reload with the new session
 
-#### Scenario: Cancelling the mode picker
-- **WHEN** the user dismisses the mode picker
-- **THEN** no session is created and a warning "Could not log in: ..." is shown
+#### Scenario: Cancelling sign in
+- **WHEN** the user dismisses any step of the sign-in flow (the mode picker, the account or key picker, the token input, the private key file dialog, or the scope picker)
+- **THEN** no session is created and no message is shown
 
 #### Scenario: Sign-in fails
 - **WHEN** any sign-in step fails
-- **THEN** a warning "Could not log in: <error>" is shown and the previous state is unchanged
+- **THEN** a warning "Could not log in: <error message>" is shown and the previous state is unchanged
 
 ### Requirement: 3-legged OAuth and PKCE
 
@@ -93,12 +93,12 @@ The "Secure Service Account" mode SHALL list the application's secure service ac
 - **THEN** sign-in fails with "The selected service account has no keys."
 
 #### Scenario: Cancelling a step
-- **WHEN** the user dismisses the account or key picker
-- **THEN** sign-in fails with "Login cancelled."
+- **WHEN** the user dismisses the account picker, the key picker, the private key file dialog, or the scope picker
+- **THEN** sign-in is cancelled without a message
 
-#### Scenario: Missing file or scopes
-- **WHEN** the user closes the file dialog without choosing a file, or selects no scopes
-- **THEN** sign-in fails with "No private key file selected." or "No scopes selected."
+#### Scenario: No scopes selected
+- **WHEN** the user confirms the scope picker with no scopes selected
+- **THEN** sign-in fails with "No scopes selected."
 
 ### Requirement: Pasted token sign in
 
@@ -110,7 +110,7 @@ The "Paste access token" mode SHALL ask for a token in a masked input box and us
 
 #### Scenario: Empty input
 - **WHEN** the user dismisses the input or submits it empty
-- **THEN** sign-in fails with "No access token provided."
+- **THEN** sign-in is cancelled without a message
 
 ### Requirement: Session storage and restore
 

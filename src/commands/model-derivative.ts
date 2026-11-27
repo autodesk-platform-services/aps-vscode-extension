@@ -219,20 +219,17 @@ export class ModelDerivativesCommands {
 		} catch (err: any) {
 			// APS may respond with code 413 to indicate that the requested JSON data is too large.
 			// In that case, offer an option of downloading the content to a local file.
-			if (err.isAxiosError && err.response.status === 413) {
+			if (err.isAxiosError && err.response?.status === 413) {
 				const action = await vscode.window.showInformationMessage(`
 					Cannot obtain viewable tree, possibly because the content is too large.
 					Would you like to try and force-download the tree JSON?
 				`, 'Force Download', 'Cancel');
-				switch (action) {
-					case 'Force Download':
-						// TODO: redirect the downloaded data directly into a file stream
-						tree = await withProgress(`Downloading viewable tree`, this.context.modelDerivativeService.getObjectTree(urn, guid, true));
-						forceDownload = true;
-						break;
-					case 'Cancel':
-						break;
+				if (action !== 'Force Download') {
+					return;
 				}
+				// TODO: redirect the downloaded data directly into a file stream
+				tree = await withProgress(`Downloading viewable tree`, this.context.modelDerivativeService.getObjectTree(urn, guid, true));
+				forceDownload = true;
 			} else {
 				throw err;
 			}
@@ -277,20 +274,17 @@ export class ModelDerivativesCommands {
 		} catch (err: any) {
 			// APS may respond with code 413 to indicate that the requested JSON data is too large.
 			// In that case, offer an option of downloading the content to a local file.
-			if (err.isAxiosError && err.response.status === 413) {
+			if (err.isAxiosError && err.response?.status === 413) {
 				const action = await vscode.window.showInformationMessage(`
 					Cannot obtain viewable properties, possibly because the content is too large.
 					Would you like to try and force-download the property JSON?
 				`, 'Force Download', 'Cancel');
-				switch (action) {
-					case 'Force Download':
-						// TODO: redirect the downloaded data directly into a file stream
-						props = await withProgress(`Downloading viewable properties`, this.context.modelDerivativeService.getAllProperties(urn, guid, true));
-						forceDownload = true;
-						break;
-					case 'Cancel':
-						break;
+				if (action !== 'Force Download') {
+					return;
 				}
+				// TODO: redirect the downloaded data directly into a file stream
+				props = await withProgress(`Downloading viewable properties`, this.context.modelDerivativeService.getAllProperties(urn, guid, true));
+				forceDownload = true;
 			} else {
 				throw err;
 			}
@@ -419,23 +413,12 @@ export class ModelDerivativesCommands {
 				return;
 			}
 
-			try {
-				await withProgress(`Deleting manifest for ${urn}`, this.context.modelDerivativeService.deleteManifest(object));
-			} catch (_) {
-				const action = await vscode.window.showInformationMessage(`
-					In order to access the manifest of ${object.objectId}, the object must be translated first.
-					Would you like to start the translation now?
-				`, TranslationActions.Translate, TranslationActions.TranslateAsArchive);
-				switch (action) {
-					case TranslationActions.Translate:
-						await this.translateObject(object);
-						break;
-					case TranslationActions.TranslateAsArchive:
-						await this.translateObject(object);
-						break;
-				}
+			const deleted = await withProgress(`Deleting manifest for ${urn}`, this.context.modelDerivativeService.deleteManifest(object));
+			if (deleted) {
+				vscode.window.showInformationMessage(`Derivatives deleted: ${object.objectKey}`);
+			} else {
+				vscode.window.showInformationMessage(`No derivatives to delete: ${object.objectKey}`);
 			}
-			vscode.window.showInformationMessage(`Derivatives deleted: ${object.objectKey}`);
 		} catch (err) {
 			showErrorMessage('Could not delete derivatives', err, this.context);
 		}

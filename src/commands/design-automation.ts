@@ -79,7 +79,8 @@ export class DesignAutomationCommands {
 	}
 
 	async viewAppBundleAliasDetails(entry?: IAppBundleAliasEntry) {
-		await viewAppBundleAliasDetails(entry ? `${entry.client}.${entry.appbundle}+${entry.alias}` : undefined, this.context);
+		entry = this.ensureInput(entry);
+		await viewAppBundleAliasDetails(`${entry.client}.${entry.appbundle}+${entry.alias}`, this.context);
 	}
 
 	async viewAppBundleVersionDetails(entry?: IAppBundleVersionEntry) {
@@ -123,7 +124,8 @@ export class DesignAutomationCommands {
 	}
 
 	async viewActivityAliasDetails(entry?: IActivityAliasEntry) {
-		await viewActivityAliasDetails(entry ? `${entry.client}.${entry.activity}+${entry.alias}` : undefined, this.context);
+		entry = this.ensureInput(entry);
+		await viewActivityAliasDetails(`${entry.client}.${entry.activity}+${entry.alias}`, this.context);
 	}
 
 	async viewActivityVersionDetails(entry?: IActivityVersionEntry) {
@@ -232,13 +234,8 @@ async function viewAppBundleDetails(id: FullyQualifiedID | INameAndVersion | und
 	}
 }
 
-async function viewAppBundleAliasDetails(id: FullyQualifiedID | undefined, context: IContext) {
+async function viewAppBundleAliasDetails(id: FullyQualifiedID, context: IContext) {
     try {
-		id ??= await promptAppBundleFullID(context);
-		if (!id) {
-			return;
-		}
-
 		// TODO: add a method to the SDK for retrieve a single alias info
 		const daid = DesignAutomationID.parse(id as FullyQualifiedID) as DesignAutomationID;
 		const aliases = await withProgress(`Getting app bundle alias details: ${id}`, context.designAutomationService.listAppBundleAliases(daid.id));
@@ -258,13 +255,8 @@ async function viewActivityDetails(id: FullyQualifiedID | INameAndVersion, conte
 	}
 }
 
-async function viewActivityAliasDetails(id: FullyQualifiedID | undefined, context: IContext) {
+async function viewActivityAliasDetails(id: FullyQualifiedID, context: IContext) {
     try {
-		id ??= await promptAppBundleFullID(context);
-		if (!id) {
-			return;
-		}
-
 		// TODO: add a method to the SDK for retrieve a single alias info
 		const daid = DesignAutomationID.parse(id as FullyQualifiedID) as DesignAutomationID;
 		const aliases = await withProgress(`Getting activity alias details: ${id}`, context.designAutomationService.listActivityAliases(daid.id));

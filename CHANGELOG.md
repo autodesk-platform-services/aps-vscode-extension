@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- Fixed
+  - Deleting a Model Derivative manifest no longer reports success when the request fails, and shows "No derivatives to delete" instead of offering a translation when the object has no manifest
+  - Cancelling a step of the sign-in flow no longer shows a "Could not log in" warning
+  - Work item header fields with a trailing `;`, an entry without `:`, or a value containing `:` no longer break the Create Work Item form
+  - Cancelling the force download of a viewable tree or properties no longer opens an empty document, and network errors are no longer masked by a `TypeError`
+  - Design Automation alias details and Hub Admin view-details/copy-ID commands that need a tree node are no longer listed in the Command Palette
+
 ## [3.10.0] - 2026-11-26
 
 - Added
